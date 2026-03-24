@@ -30,9 +30,21 @@ export function Header() {
         <div className="flex items-center space-x-4">
           {user && (
             <>
-              <span className="text-sm text-gray-600">
-                {user.fullName} ({user.role.replace('_', ' ')})
-              </span>
+              <div className="flex items-center space-x-3">
+                {user.avatarUrl ? (
+                  <img src={user.avatarUrl} alt={user.fullName} className="w-8 h-8 rounded-full" />
+                ) : (
+                  <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs">
+                    {user.fullName.charAt(0)}
+                  </div>
+                )}
+                <span className="text-sm text-gray-600 font-medium">
+                  {user.fullName}
+                </span>
+                <span className="text-xs bg-gray-100 px-2 py-1 rounded text-gray-500 uppercase">
+                  {user.role.replace('_', ' ')}
+                </span>
+              </div>
               <button
                 onClick={handleSignOut}
                 className="text-sm text-red-600 hover:text-red-800"

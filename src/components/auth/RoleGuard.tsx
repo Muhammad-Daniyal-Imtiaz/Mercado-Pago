@@ -11,7 +11,7 @@ interface RoleGuardProps {
 export default async function RoleGuard({
   children,
   allowedRoles,
-  fallbackPath = '/dashboard',
+  fallbackPath = '/',
 }: RoleGuardProps) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
