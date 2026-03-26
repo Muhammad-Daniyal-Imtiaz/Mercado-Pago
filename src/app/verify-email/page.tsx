@@ -7,6 +7,7 @@ export default function VerifyInvitationPage() {
   const router = useRouter()
   const [formData, setFormData] = useState({
     email: '',
+    fullName: '',
     otp: '',
     password: '',
   })
@@ -50,6 +51,18 @@ export default function VerifyInvitationPage() {
         <p className="text-zinc-600 dark:text-zinc-400 text-center mb-8">Enter your invitation details and choose a password.</p>
         
         <form onSubmit={handleSubmit} className="space-y-6">
+          <div>
+            <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Full Name</label>
+            <input
+              name="fullName"
+              type="text"
+              required
+              value={formData.fullName}
+              onChange={handleChange}
+              className="w-full px-4 py-3 rounded-xl border border-zinc-300 dark:border-zinc-700 bg-transparent focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+              placeholder="Your Full Name"
+            />
+          </div>
           <div>
             <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Email Address</label>
             <input

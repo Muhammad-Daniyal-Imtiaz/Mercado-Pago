@@ -3,7 +3,8 @@ import { createAdminClient } from '@/utils/supabase/admin'
 import { NextResponse } from 'next/server'
 
 export async function POST(request: Request) {
-  const { email, otp, password } = await request.json()
+  const { email, otp, password, fullName } = await request.json()
+
   const supabase = await createClient()
   const adminClient = createAdminClient()
 
@@ -25,7 +26,6 @@ export async function POST(request: Request) {
   }
 
   // 3. Create the user in Auth
-  // We use the standard signUp but pass the metadata from the invitation
   const { data: authData, error: authError } = await supabase.auth.signUp({
     email,
     password,
@@ -33,10 +33,12 @@ export async function POST(request: Request) {
       data: {
         role: invitation.role,
         account_id: invitation.account_id,
-        // Potentially extra data...
+        full_name: fullName, // Pass the full name from the form
+
       },
     },
   })
+
 
   if (authError) {
     return NextResponse.json({ error: authError.message }, { status: 400 })
