@@ -1,27 +1,40 @@
 import { createClient } from '@/utils/supabase/server'
+import { createAdminClient } from '@/utils/supabase/admin'
 import { NextResponse } from 'next/server'
 
 export async function GET() {
   const supabase = await createClient()
-  const { data: { user: authUser } } = await supabase.auth.getUser()
+  const { data: { user: authUser }, error: authError } = await supabase.auth.getUser()
 
-  if (!authUser) {
+  if (authError || !authUser) {
     return NextResponse.json({ user: null }, { status: 401 })
   }
 
-  const { data: profile } = await supabase
+  // Use admin client to bypass potential RLS issues for the initial session load
+  // and ensure we always get the profile data if it exists.
+  const adminClient = createAdminClient()
+  const { data: profile, error: profileError } = await adminClient
     .from('users')
-    .select('*')
+    .select(`
+      *,
+      account:account_id (
+        name,
+        slug
+      )
+    `)
     .eq('id', authUser.id)
     .single()
 
-  if (!profile) {
+  if (profileError || !profile) {
+    console.error('Profile fetch error:', profileError)
     return NextResponse.json({
       user: {
         id: authUser.id,
         email: authUser.email,
         fullName: authUser.user_metadata?.full_name || authUser.email,
-        role: 'account_user'
+        role: authUser.user_metadata?.role || 'account_user',
+        isVerified: false,
+        account: null
       }
     })
   }
@@ -35,7 +48,8 @@ export async function GET() {
       avatarUrl: profile.avatar_url,
       role: profile.role,
       isVerified: profile.is_verified,
-      lastLogin: profile.last_login_at
+      lastLogin: profile.last_login_at,
+      account: profile.account
     }
   })
 }
