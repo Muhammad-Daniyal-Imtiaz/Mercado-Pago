@@ -1,108 +1,69 @@
-import { createAdminClient } from '@/utils/supabase/server'
+import { createClient } from '@/utils/supabase/server'
 import { NextResponse } from 'next/server'
-import { randomBytes } from 'crypto'
 import { sendInvitationEmail } from '@/lib/email'
 
 export async function POST(request: Request) {
+  const { email, role } = await request.json()
+  const supabase = await createClient()
+
+  // 1. Get current user session
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+  if (authError || !user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  // 2. Get current user's role and account_id from public schema
+  const { data: userData, error: userError } = await supabase
+    .from('users')
+    .select('role, account_id, full_name')
+    .eq('id', user.id)
+    .single()
+
+  if (userError || !userData) {
+    return NextResponse.json({ error: 'User data not found' }, { status: 404 })
+  }
+
+  if (userData.role !== 'account_admin' && userData.role !== 'sysadmin') {
+    return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 })
+  }
+
+  if (!userData.account_id && userData.role !== 'sysadmin') {
+     return NextResponse.json({ error: 'Account not associated with admin' }, { status: 400 })
+  }
+
+  // 3. Generate 6-digit OTP
+  const otp = Math.floor(100000 + Math.random() * 900000).toString()
+  const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours expiry
+
+  // 4. Store invitation in DB
+  const { error: inviteError } = await supabase
+    .from('invitations')
+    .upsert({
+      email,
+      role,
+      account_id: userData.account_id,
+      invited_by: user.id,
+      token: otp,
+      expires_at: expiresAt.toISOString(),
+    }, { onConflict: 'email,account_id' })
+
+  if (inviteError) {
+    return NextResponse.json({ error: inviteError.message }, { status: 500 })
+  }
+
+  // 5. Send Email via NodeMailer (helper in lib/email.ts)
   try {
-    const { email, role, accountId } = await request.json()
-
-    // Get current user from auth
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-
-    if (!user) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
-    }
-
-    // Check if current user is account admin or sysadmin
-    const adminClient = createAdminClient()
-    const { data: currentUser } = await adminClient
-      .from('users')
-      .select('role, account_id')
-      .eq('id', user.id)
-      .single()
-
-    if (!currentUser || (currentUser.role !== 'account_admin' && currentUser.role !== 'sysadmin')) {
-      return NextResponse.json(
-        { error: 'Insufficient permissions' },
-        { status: 403 }
-      )
-    }
-
-    // Validate role
-    const validRoles = ['account_user', 'account_observer']
-    if (!validRoles.includes(role)) {
-      return NextResponse.json(
-        { error: 'Invalid role for invitation' },
-        { status: 400 }
-      )
-    }
-
-    // Check if user already exists
-    const { data: existingUser } = await adminClient
-      .from('users')
-      .select('id')
-      .eq('email', email)
-      .single()
-
-    if (existingUser) {
-      return NextResponse.json(
-        { error: 'User already exists' },
-        { status: 400 }
-      )
-    }
-
-    // Generate invitation token
-    const invitationToken = randomBytes(32).toString('hex')
-    const expiresAt = new Date()
-    expiresAt.setHours(expiresAt.getHours() + 48) // 48 hours
-
-    // Create invitation record
-    const { error: inviteError } = await adminClient
-      .from('users')
-      .insert({
-        email,
-        role,
-        account_id: accountId || currentUser.account_id,
-        invited_by: user.id,
-        invitation_token: invitationToken,
-        invitation_expires_at: expiresAt.toISOString(),
-        is_active: false,
-        is_verified: false
-      })
-
-    if (inviteError) {
-      return NextResponse.json(
-        { error: 'Failed to create invitation' },
-        { status: 500 }
-      )
-    }
-
-    // Send invitation email
-    const invitationLink = `${process.env.NEXT_PUBLIC_APP_URL}/invite?token=${invitationToken}`
-    
     await sendInvitationEmail({
       to: email,
-      invitedBy: currentUser.full_name || 'An administrator',
+      invitedBy: userData.full_name || user.email || 'Admin',
       role,
-      invitationLink,
-      expiresAt
+      invitationLink: otp,
+      expiresAt,
     })
-
-    return NextResponse.json({
-      success: true,
-      message: 'Invitation sent successfully'
-    })
-
   } catch (error) {
-    console.error('Invitation error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    console.error('Email sending failed:', error)
+    return NextResponse.json({ error: 'Invitation stored but email failed to send' }, { status: 500 })
   }
+
+  return NextResponse.json({ success: true, message: 'Invitation sent successfully' })
 }

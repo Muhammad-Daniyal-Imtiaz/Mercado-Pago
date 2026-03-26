@@ -7,6 +7,7 @@ export default function SignupForm() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [fullName, setFullName] = useState('')
+  const [role, setRole] = useState('account_admin')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
@@ -21,7 +22,7 @@ export default function SignupForm() {
       const res = await fetch('/api/auth/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, full_name: fullName }),
+        body: JSON.stringify({ email, password, full_name: fullName, role }),
       })
 
       const data = await res.json()
@@ -113,7 +114,26 @@ export default function SignupForm() {
             className="w-full px-4 py-3 bg-zinc-50 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
             placeholder="••••••••"
           />
-          <p className="mt-2 text-xs text-zinc-500">Minimum 8 characters with letters and numbers</p>
+        </div>
+
+        <div>
+          <label htmlFor="role" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
+            I am joining as...
+          </label>
+          <select
+            id="role"
+            value={role}
+            onChange={(e) => setRole(e.target.value)}
+            className="w-full px-4 py-3 bg-zinc-50 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+          >
+            <option value="account_admin">Account Admin (Business Owner)</option>
+            <option value="sysadmin">System Admin</option>
+          </select>
+          <p className="mt-2 text-xs text-zinc-500">
+            {role === 'account_admin' 
+              ? 'You will create a new organization and can invite team members later.'
+              : 'Full access to manage the entire platform.'}
+          </p>
         </div>
 
         {error && (
@@ -138,5 +158,6 @@ export default function SignupForm() {
         </a>
       </p>
     </div>
+
   )
 }

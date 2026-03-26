@@ -1,4 +1,5 @@
-// This is a placeholder – integrate with your email service (Resend, SendGrid, etc.)
+import { sendEmail } from './nodemailer';
+
 export async function sendInvitationEmail({
   to,
   invitedBy,
@@ -12,9 +13,17 @@ export async function sendInvitationEmail({
   invitationLink: string
   expiresAt: Date
 }) {
-  console.log(`Sending invitation email to ${to} from ${invitedBy} for role ${role}`)
-  console.log(`Link: ${invitationLink} (expires ${expiresAt})`)
-  // Implement actual email sending here
+  const subject = `You've been invited to join as ${role}`;
+  const html = `
+    <h1>Invitation to Join</h1>
+    <p>You have been invited by ${invitedBy} to join as a <strong>${role}</strong>.</p>
+    <p>Please use the following 6-digit code to complete your registration:</p>
+    <h2>${invitationLink}</h2>
+    <p>This code will expire at: ${expiresAt.toLocaleString()}</p>
+    <p>Thank you!</p>
+  `;
+
+  await sendEmail({ to, subject, html });
 }
 
 export async function sendPasswordResetEmail({

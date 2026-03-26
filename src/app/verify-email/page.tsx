@@ -1,67 +1,104 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { useSearchParams } from 'next/navigation'
-import Link from 'next/link'
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 
-export default function VerifyEmailPage() {
-  const searchParams = useSearchParams()
-  const email = searchParams.get('email')
-  const [verified, setVerified] = useState(false)
+export default function VerifyInvitationPage() {
+  const router = useRouter()
+  const [formData, setFormData] = useState({
+    email: '',
+    otp: '',
+    password: '',
+  })
+  const [loading, setLoading] = useState(false)
+  const [message, setMessage] = useState('')
   const [error, setError] = useState('')
 
-  useEffect(() => {
-    const token = searchParams.get('token')
-    if (token) {
-      fetch('/api/auth/verify', {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value })
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setLoading(true)
+    setMessage('')
+    setError('')
+
+    try {
+      const res = await fetch('/api/auth/verify-invite', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token })
+        body: JSON.stringify(formData),
       })
-        .then(res => res.json())
-        .then(data => {
-          if (data.success) {
-            setVerified(true)
-          } else {
-            setError(data.error || 'Verification failed')
-          }
-        })
-        .catch(() => setError('Verification failed'))
+
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Failed to verify invitation')
+
+      setMessage('Success! Redirecting to login...')
+      setTimeout(() => router.push('/login'), 2000)
+    } catch (err: any) {
+      setError(err.message)
+    } finally {
+      setLoading(false)
     }
-  }, [searchParams])
+  }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="max-w-md w-full p-8 bg-white rounded-lg shadow text-center">
-        {verified ? (
-          <>
-            <h2 className="text-2xl font-bold text-green-600 mb-4">Email Verified!</h2>
-            <p className="mb-4">Your email has been successfully verified.</p>
-            <Link href="/login" className="text-blue-600 hover:underline">
-              Proceed to login
-            </Link>
-          </>
-        ) : error ? (
-          <>
-            <h2 className="text-2xl font-bold text-red-600 mb-4">Verification Failed</h2>
-            <p className="mb-4">{error}</p>
-            <Link href="/login" className="text-blue-600 hover:underline">
-              Back to login
-            </Link>
-          </>
-        ) : (
-          <>
-            <h2 className="text-2xl font-bold mb-4">Check your email</h2>
-            <p className="mb-4">
-              We've sent a verification link to <strong>{email}</strong>.
-              Please click the link to verify your email.
-            </p>
-            <p className="text-sm text-gray-500">
-              Didn't receive the email? Check your spam folder or{' '}
-              <button className="text-blue-600 hover:underline">resend</button>.
-            </p>
-          </>
-        )}
+    <div className="min-h-screen flex items-center justify-center p-4 bg-zinc-50 dark:bg-zinc-950">
+      <div className="max-w-md w-full p-8 bg-white dark:bg-zinc-900 rounded-2xl shadow-xl border border-zinc-200 dark:border-zinc-800">
+        <h1 className="text-3xl font-bold text-center mb-8 text-zinc-900 dark:text-white">Complete Your Registration</h1>
+        <p className="text-zinc-600 dark:text-zinc-400 text-center mb-8">Enter your invitation details and choose a password.</p>
+        
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div>
+            <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Email Address</label>
+            <input
+              name="email"
+              type="email"
+              required
+              value={formData.email}
+              onChange={handleChange}
+              className="w-full px-4 py-3 rounded-xl border border-zinc-300 dark:border-zinc-700 bg-transparent focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+              placeholder="user@example.com"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">6-Digit Invitation Code</label>
+            <input
+              name="otp"
+              type="text"
+              required
+              maxLength={6}
+              value={formData.otp}
+              onChange={handleChange}
+              className="w-full px-4 py-3 rounded-xl border border-zinc-300 dark:border-zinc-700 bg-transparent focus:ring-2 focus:ring-blue-500 outline-none transition-all tracking-widest text-center text-xl font-bold"
+              placeholder="000000"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Create Password</label>
+            <input
+              name="password"
+              type="password"
+              required
+              value={formData.password}
+              onChange={handleChange}
+              className="w-full px-4 py-3 rounded-xl border border-zinc-300 dark:border-zinc-700 bg-transparent focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+              placeholder="••••••••"
+              minLength={6}
+            />
+          </div>
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full py-4 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 font-bold rounded-xl transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg disabled:opacity-50"
+          >
+            {loading ? 'Verifying...' : 'Complete Signup'}
+          </button>
+          
+          {message && <p className="text-green-600 font-bold text-center animate-pulse">{message}</p>}
+          {error && <p className="text-red-600 font-medium text-center bg-red-50 dark:bg-red-900/20 p-3 rounded-lg">{error}</p>}
+        </form>
       </div>
     </div>
   )
