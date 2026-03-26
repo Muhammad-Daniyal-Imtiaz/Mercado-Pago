@@ -22,32 +22,35 @@ export function Header() {
   }
 
   return (
-    <header className="bg-white shadow-sm">
-      <div className="flex justify-between items-center px-6 py-3">
-        <Link href="/dashboard" className="text-xl font-semibold">
-          AlertApp
+    <header className="sticky top-0 z-50 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md border-b border-zinc-200 dark:border-zinc-800 transition-colors">
+      <div className="max-w-7xl mx-auto flex justify-between items-center px-6 py-4">
+        <Link href="/dashboard" className="text-2xl font-black tracking-tighter text-zinc-900 dark:text-white hover:opacity-80 transition-opacity">
+          ALERT<span className="text-blue-600">APP</span>
         </Link>
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-6">
           {user && (
             <>
-              <div className="flex items-center space-x-3">
+              <div className="flex items-center space-x-4">
+                <div className="text-right hidden sm:block">
+                  <p className="text-sm font-bold text-zinc-900 dark:text-white leading-tight">
+                    {user.fullName}
+                  </p>
+                  <p className="text-[10px] uppercase tracking-widest text-zinc-500 font-bold">
+                    {user.role.replace('_', ' ')}
+                  </p>
+                </div>
                 {user.avatarUrl ? (
-                  <img src={user.avatarUrl} alt={user.fullName} className="w-8 h-8 rounded-full" />
+                  <img src={user.avatarUrl} alt={user.fullName} className="w-10 h-10 rounded-full ring-2 ring-zinc-100 dark:ring-zinc-800" />
                 ) : (
-                  <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center text-white font-bold shadow-lg">
                     {user.fullName.charAt(0)}
                   </div>
                 )}
-                <span className="text-sm text-gray-600 font-medium">
-                  {user.fullName}
-                </span>
-                <span className="text-xs bg-gray-100 px-2 py-1 rounded text-gray-500 uppercase">
-                  {user.role.replace('_', ' ')}
-                </span>
               </div>
+              <div className="h-6 w-px bg-zinc-200 dark:bg-zinc-800" />
               <button
                 onClick={handleSignOut}
-                className="text-sm text-red-600 hover:text-red-800"
+                className="text-sm font-bold text-red-600 hover:text-red-700 transition-colors"
               >
                 Sign out
               </button>
@@ -57,4 +60,4 @@ export function Header() {
       </div>
     </header>
   )
-}
+}

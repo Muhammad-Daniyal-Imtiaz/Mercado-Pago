@@ -28,20 +28,20 @@ export function Sidebar() {
   ]
 
   const filteredItems = navItems.filter(item => 
-    userRole && item.roles.includes(userRole)
+    userRole === 'sysadmin' || (userRole && item.roles.includes(userRole))
   )
 
   return (
-    <aside className="w-64 bg-white shadow-sm min-h-screen">
-      <nav className="p-4 space-y-1">
+    <aside className="w-64 bg-white dark:bg-zinc-900 border-r border-zinc-200 dark:border-zinc-800 transition-colors min-h-[calc(100vh-64px)]">
+      <nav className="p-4 space-y-2">
         {filteredItems.map((item) => (
           <Link
             key={item.href}
             href={item.href}
-            className={`block px-4 py-2 rounded-md ${
+            className={`flex items-center px-4 py-2.5 rounded-xl transition-all font-medium ${
               isActive(item.href)
-                ? 'bg-blue-50 text-blue-600'
-                : 'text-gray-700 hover:bg-gray-50'
+                ? 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 shadow-md scale-[1.02]'
+                : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800'
             }`}
           >
             {item.name}
@@ -50,4 +50,4 @@ export function Sidebar() {
       </nav>
     </aside>
   )
-}
+}
