@@ -13,30 +13,29 @@ interface RoleGuardProps {
 export default function RoleGuard({ children, allowedRoles, fallback }: RoleGuardProps) {
   const [userRole, setUserRole] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
-  const supabase = createClient()
   const router = useRouter()
 
   useEffect(() => {
     async function checkRole() {
-      const { data: { user } } = await supabase.auth.getUser()
-      
-      if (!user) {
-        router.push('/login')
-        return
+      try {
+        const res = await fetch('/api/auth/session')
+        const data = await res.json()
+        
+        if (!res.ok || !data.user) {
+          router.push('/login')
+          return
+        }
+
+        setUserRole(data.user.role)
+      } catch (error) {
+        console.error('Role check failed:', error)
+      } finally {
+        setLoading(false)
       }
-
-      const { data: userData } = await supabase
-        .from('users')
-        .select('role')
-        .eq('id', user.id)
-        .single()
-
-      setUserRole(userData?.role || null)
-      setLoading(false)
     }
 
     checkRole()
-  }, [supabase, router])
+  }, [router])
 
   if (loading) {
     return (

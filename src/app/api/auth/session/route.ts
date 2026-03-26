@@ -10,8 +10,7 @@ export async function GET() {
     return NextResponse.json({ user: null }, { status: 401 })
   }
 
-  // Use admin client to bypass potential RLS issues for the initial session load
-  // and ensure we always get the profile data if it exists.
+  // Use admin client to ensure we always get the profile role from the users table
   const adminClient = createAdminClient()
   const { data: profile, error: profileError } = await adminClient
     .from('users')
@@ -46,7 +45,7 @@ export async function GET() {
       username: profile.username,
       fullName: profile.full_name,
       avatarUrl: profile.avatar_url,
-      role: profile.role,
+      role: profile.role, // This comes directly from public.users.role
       isVerified: profile.is_verified,
       lastLogin: profile.last_login_at,
       account: profile.account
