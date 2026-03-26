@@ -1,4 +1,5 @@
 import { createClient } from '@/utils/supabase/server'
+import { createAdminClient } from '@/utils/supabase/admin'
 import { NextResponse } from 'next/server'
 import { sendInvitationEmail } from '@/lib/email'
 
@@ -12,16 +13,22 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  // 2. Get current user's role and account_id from public schema
-  const { data: userData, error: userError } = await supabase
+  // 2. Get current user's role and account_id - use ADMIN client to bypass RLS
+  const adminClient = createAdminClient()
+  const { data: userData, error: userError } = await adminClient
     .from('users')
-    .select('role, account_id, full_name')
+    .select('role, account_id, full_name, email')
     .eq('id', user.id)
     .single()
 
   if (userError || !userData) {
-    return NextResponse.json({ error: 'User data not found' }, { status: 404 })
+    console.error('Invite Admin Check Error:', userError)
+    return NextResponse.json({ 
+      error: 'User data not found for inviter', 
+      details: userError?.message 
+    }, { status: 404 })
   }
+
 
   if (userData.role !== 'account_admin' && userData.role !== 'sysadmin') {
     return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 })
@@ -35,8 +42,8 @@ export async function POST(request: Request) {
   const otp = Math.floor(100000 + Math.random() * 900000).toString()
   const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours expiry
 
-  // 4. Store invitation in DB
-  const { error: inviteError } = await supabase
+  // 4. Store invitation in DB - use ADMIN client
+  const { error: inviteError } = await adminClient
     .from('invitations')
     .upsert({
       email,
@@ -48,8 +55,10 @@ export async function POST(request: Request) {
     }, { onConflict: 'email,account_id' })
 
   if (inviteError) {
+    console.error('Invite DB Error:', inviteError)
     return NextResponse.json({ error: inviteError.message }, { status: 500 })
   }
+
 
   // 5. Send Email via NodeMailer (helper in lib/email.ts)
   try {
