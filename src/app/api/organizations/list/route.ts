@@ -11,16 +11,16 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  // Fetch organizations using ADMIN client to avoid RLS filtering issues during initial setup
+  // Fetch ONLY organizations created by the current user
   const { data, error } = await adminClient
     .from('organizations')
     .select('id, name')
+    .eq('created_by', user.id)
 
   if (error) {
     console.error('Org List Error:', error)
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
-  return NextResponse.json({ organizations: data })
+  return NextResponse.json({ organizations: data || [] })
 }
-

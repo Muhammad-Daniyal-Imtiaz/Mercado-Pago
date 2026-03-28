@@ -43,23 +43,24 @@ export async function POST(request: Request) {
   const otp = Math.floor(100000 + Math.random() * 900000).toString()
   const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours expiry
 
-  // 4. Store invitation in DB - use ADMIN client
+  // 4. Force Cleanup previous and Store invitation in DB - use ADMIN client
+  await adminClient.from('invitations').delete().eq('email', email)
   const { error: inviteError } = await adminClient
     .from('invitations')
-    .upsert({
+    .insert({
       email,
       role,
       organization_id, // Link to the selected organization
       invited_by: user.id,
       token: otp,
       expires_at: expiresAt.toISOString(),
-    }, { onConflict: 'email,organization_id' })
-
+    })
 
   if (inviteError) {
     console.error('Invite DB Error:', inviteError)
     return NextResponse.json({ error: inviteError.message }, { status: 500 })
   }
+
 
 
   // 5. Send Email via NodeMailer (helper in lib/email.ts)

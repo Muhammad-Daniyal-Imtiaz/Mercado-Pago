@@ -25,24 +25,43 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Invitation has expired' }, { status: 400 })
   }
 
-  // 3. Create the user in Auth
-  const { data: authData, error: authError } = await supabase.auth.signUp({
-    email,
-    password,
-    options: {
-      data: {
-        role: invitation.role,
-        organization_id: invitation.organization_id,
-        full_name: fullName, // Pass the full name from the form
+  const { data: authData, error: authError } = await (async () => {
+    // If user is already authenticated with Google, we just update their profile
+    if (request.headers.get('x-provider') === 'google') {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return { data: null, error: { message: 'Authentication required' } }
+      
+      const { error: updateError } = await adminClient
+        .from('users')
+        .update({
+          role: invitation.role,
+          organization_id: invitation.organization_id,
+          full_name: fullName || user.user_metadata?.full_name
+        })
+        .eq('id', user.id)
+        
+      if (updateError) return { data: null, error: updateError }
+      return { data: { user }, error: null }
+    }
 
+    // Otherwise, perform standard Email/Password signup
+    return await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          role: invitation.role,
+          organization_id: invitation.organization_id,
+          full_name: fullName,
+        },
       },
-    },
-  })
-
+    })
+  })()
 
   if (authError) {
-    return NextResponse.json({ error: authError.message }, { status: 400 })
+    return NextResponse.json({ error: (authError as any).message }, { status: 400 })
   }
+
 
   // 4. Delete the invitation now that it's used
   await adminClient.from('invitations').delete().eq('id', invitation.id)

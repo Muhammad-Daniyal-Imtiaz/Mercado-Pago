@@ -25,6 +25,8 @@ export async function sendInvitationEmail({
         <span style="font-size: 42px; font-weight: 900; letter-spacing: 0.2em; color: #09090b;">${invitationLink}</span>
       </div>
       <p>Please enter this code on the <a href="${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/verify-email">verification page</a> to complete your setup.</p>
+
+
       <hr style="border: none; border-top: 1px solid #e4e4e7; margin: 30px 0;" />
       <p style="font-size: 12px; color: #a1a1aa;">This invitation expires on ${expiresAt.toLocaleDateString()}. If you weren't expecting this, you can safely ignore this email.</p>
     </div>

@@ -15,10 +15,19 @@ export async function GET(request: Request) {
     const { data: { user }, error } = await supabase.auth.exchangeCodeForSession(code)
     
     if (!error && user) {
-      // FORCE persistent role update in the public database to prevent "Account User" default
       const admin = createAdminClient()
       
-      // This is the CRITICAL fix: manually forcing the database role to match the choice
+      // Check if user has a pending invitation
+      const { data: pendingInvite } = await admin.from('invitations').select('*').eq('email', user.email).single()
+      const { data: existingProfile } = await admin.from('users').select('*').eq('id', user.id).single()
+
+      if (pendingInvite && (!existingProfile || !existingProfile.role || existingProfile.role === 'account_user')) {
+        // Redirection to the UNIFIED verification screen for invited users
+        return NextResponse.redirect(`${origin}/verify-email?email=${user.email}&provider=google`)
+      }
+
+
+      // Normal path: Force role update based on what they selected in the UI modal
       await admin
         .from('users')
         .upsert({ 
@@ -28,14 +37,13 @@ export async function GET(request: Request) {
           full_name: user.user_metadata?.full_name || user.email
         }, { onConflict: 'id' })
 
-      
-      // Overwrite next if we have a specific role dashboard
       if (next === '/dashboard') {
         next = `/dashboard/${role}`
       }
       
       return NextResponse.redirect(`${origin}${next}`)
     }
+
   }
 
   // return the user to an error page with instructions
