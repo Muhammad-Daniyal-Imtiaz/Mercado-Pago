@@ -24,7 +24,8 @@ export async function sendInvitationEmail({
         <p style="margin-bottom: 10px; font-size: 14px; color: #71717a; text-transform: uppercase; letter-spacing: 0.1em; font-weight: bold;">Your Verification Code</p>
         <span style="font-size: 42px; font-weight: 900; letter-spacing: 0.2em; color: #09090b;">${invitationLink}</span>
       </div>
-      <p>Please enter this code on the <a href="${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/verify-email">verification page</a> to complete your setup.</p>
+      <p>Please enter this code on the <a href="http://localhost:3000//verify-email">verification page</a> to complete your setup.</p>
+
 
 
       <hr style="border: none; border-top: 1px solid #e4e4e7; margin: 30px 0;" />
