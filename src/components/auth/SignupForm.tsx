@@ -11,6 +11,11 @@ export default function SignupForm() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
+  
+  // NEW: State for Google Role Selection Window
+  const [showRoleModal, setShowRoleModal] = useState(false)
+  const [googleLoading, setGoogleLoading] = useState(false)
+  
   const router = useRouter()
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -26,17 +31,18 @@ export default function SignupForm() {
       })
 
       const data = await res.json()
-
-      if (!res.ok) {
-        throw new Error(data.error || 'Failed to sign up')
-      }
-
+      if (!res.ok) throw new Error(data.error || 'Failed to sign up')
       setSuccess(true)
     } catch (err: any) {
       setError(err.message)
     } finally {
       setLoading(false)
     }
+  }
+
+  const handleGoogleSignupConfirm = (selectedRole: string) => {
+    setGoogleLoading(true)
+    window.location.href = `/api/auth/google?role=${selectedRole}`
   }
 
   if (success) {
@@ -49,11 +55,11 @@ export default function SignupForm() {
         </div>
         <h2 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100 mb-2">Check your email</h2>
         <p className="text-zinc-500 dark:text-zinc-400 mb-8">
-          We've sent a verification link to <span className="font-semibold text-zinc-900 dark:text-zinc-100">{email}</span>. Please click the link to activate your account.
+          We've sent a verification link to <span className="font-semibold text-zinc-900 dark:text-zinc-100">{email}</span>.
         </p>
         <button
           onClick={() => router.push('/login')}
-          className="w-full py-3 px-4 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 font-semibold rounded-xl hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-all"
+          className="w-full py-3 px-4 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 font-semibold rounded-xl"
         >
           Back to Login
         </button>
@@ -62,102 +68,133 @@ export default function SignupForm() {
   }
 
   return (
-    <div className="w-full max-w-md mx-auto p-8 bg-white dark:bg-zinc-900 rounded-2xl shadow-xl border border-zinc-200 dark:border-zinc-800">
+    <div className="relative w-full max-w-md mx-auto p-8 bg-white dark:bg-zinc-900 rounded-2xl shadow-xl border border-zinc-200 dark:border-zinc-800">
+      {/* Google Role Selection Modal Overlay */}
+      {showRoleModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-zinc-900/80 backdrop-blur-md animate-in fade-in duration-300">
+          <div className="w-full max-w-sm bg-white dark:bg-zinc-900 rounded-[2.5rem] p-10 shadow-2xl border border-zinc-200 dark:border-zinc-800 animate-in zoom-in-95 duration-200">
+            <h2 className="text-3xl font-black mb-2 text-zinc-900 dark:text-white uppercase tracking-tighter leading-none">Who Are You?</h2>
+            <p className="text-zinc-500 text-sm mb-8 font-medium italic">Select your workspace role before proceeding with Google auth.</p>
+            
+            <div className="grid grid-cols-1 gap-4 mb-10">
+              <button 
+                onClick={() => handleGoogleSignupConfirm('account_admin')}
+                className="group p-6 text-left rounded-3xl border-2 border-zinc-100 dark:border-zinc-800 hover:border-zinc-900 dark:hover:border-white transition-all bg-zinc-50 dark:bg-zinc-950 shadow-sm"
+              >
+                <div className="font-black text-zinc-900 dark:text-white text-xl group-hover:translate-x-1 transition-transform uppercase">Account Admin</div>
+                <div className="text-xs text-zinc-500 font-bold uppercase tracking-widest mt-1 opacity-60">Organization Owner</div>
+              </button>
+              <button 
+                onClick={() => handleGoogleSignupConfirm('sysadmin')}
+                className="group p-6 text-left rounded-3xl border-2 border-zinc-100 dark:border-zinc-800 hover:border-zinc-900 dark:hover:border-white transition-all bg-zinc-50 dark:bg-zinc-950 shadow-sm"
+              >
+                <div className="font-black text-zinc-900 dark:text-white text-xl group-hover:translate-x-1 transition-transform uppercase">System Admin</div>
+                <div className="text-xs text-zinc-500 font-bold uppercase tracking-widest mt-1 opacity-60">Global Platform Access</div>
+              </button>
+            </div>
+
+            <button 
+              onClick={() => setShowRoleModal(false)}
+              className="w-full py-4 text-zinc-400 font-black uppercase tracking-widest text-xs hover:text-zinc-900 dark:hover:text-white transition-colors"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="text-center mb-10">
-        <h1 className="text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">Create an account</h1>
-        <p className="mt-2 text-zinc-500 dark:text-zinc-400">Join us and start managing your workspace</p>
+        <h1 className="text-3xl font-black tracking-tighter text-zinc-900 dark:text-zinc-100 uppercase">Create Account</h1>
+        <p className="mt-2 text-zinc-500 dark:text-zinc-400 font-medium">Join AlertApp and manage your team</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-5">
         <div>
-          <label htmlFor="fullName" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
-            Full Name
-          </label>
+          <label htmlFor="fullName" className="block text-xs font-black uppercase tracking-[0.2em] text-zinc-400 mb-2">Full Name</label>
           <input
             id="fullName"
             type="text"
             required
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
-            className="w-full px-4 py-3 bg-zinc-50 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+            className="w-full px-4 py-3 bg-zinc-50 dark:bg-zinc-800 border-2 border-zinc-100 dark:border-zinc-700/30 rounded-xl focus:border-zinc-900 dark:focus:border-white outline-none transition-all font-bold"
             placeholder="John Doe"
           />
         </div>
 
         <div>
-          <label htmlFor="email" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
-            Email address
-          </label>
+          <label htmlFor="email" className="block text-xs font-black uppercase tracking-[0.2em] text-zinc-400 mb-2">Email Address</label>
           <input
             id="email"
             type="email"
             required
-            autoComplete="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full px-4 py-3 bg-zinc-50 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+            className="w-full px-4 py-3 bg-zinc-50 dark:bg-zinc-800 border-2 border-zinc-100 dark:border-zinc-700/30 rounded-xl focus:border-zinc-900 dark:focus:border-white outline-none transition-all font-bold"
             placeholder="you@example.com"
           />
         </div>
 
         <div>
-          <label htmlFor="password" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
-            Password
-          </label>
+          <label htmlFor="password" className="block text-xs font-black uppercase tracking-[0.2em] text-zinc-400 mb-2">Password</label>
           <input
             id="password"
             type="password"
             required
-            autoComplete="new-password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-4 py-3 bg-zinc-50 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+            className="w-full px-4 py-3 bg-zinc-50 dark:bg-zinc-800 border-2 border-zinc-100 dark:border-zinc-700/30 rounded-xl focus:border-zinc-900 dark:focus:border-white outline-none transition-all font-bold"
             placeholder="••••••••"
           />
         </div>
 
         <div>
-          <label htmlFor="role" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
-            I am joining as...
-          </label>
+          <label htmlFor="role" className="block text-xs font-black uppercase tracking-[0.2em] text-zinc-400 mb-2">Joined as</label>
           <select
             id="role"
             value={role}
             onChange={(e) => setRole(e.target.value)}
-            className="w-full px-4 py-3 bg-zinc-50 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+            className="w-full px-4 py-3 bg-zinc-50 dark:bg-zinc-800 border-2 border-zinc-100 dark:border-zinc-700/30 rounded-xl outline-none transition-all font-bold"
           >
-            <option value="account_admin">Account Admin (Business Owner)</option>
+            <option value="account_admin">Account Admin</option>
             <option value="sysadmin">System Admin</option>
           </select>
-          <p className="mt-2 text-xs text-zinc-500">
-            {role === 'account_admin' 
-              ? 'You will create a new organization and can invite team members later.'
-              : 'Full access to manage the entire platform.'}
-          </p>
         </div>
 
-        {error && (
-          <div className="p-3 text-sm text-red-500 bg-red-50 dark:bg-red-900/30 rounded-lg border border-red-200 dark:border-red-800">
-            {error}
-          </div>
-        )}
+        {error && <div className="p-4 text-xs font-bold text-red-500 bg-red-50 dark:bg-red-900/10 rounded-xl border border-red-200 dark:border-red-800">{error}</div>}
 
         <button
           type="submit"
           disabled={loading}
-          className="w-full py-3 px-4 mt-4 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 font-semibold rounded-xl hover:bg-zinc-800 dark:hover:bg-zinc-200 focus:ring-4 focus:ring-zinc-900/20 transition-all disabled:opacity-50"
+          className="w-full py-4 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 font-black rounded-xl hover:scale-[1.02] transition-all shadow-xl disabled:opacity-50 uppercase tracking-widest"
         >
-          {loading ? 'Creating account...' : 'Create Account'}
+          {loading ? 'Creating...' : 'Create Account'}
+        </button>
+
+        <div className="relative py-4">
+          <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-zinc-200 dark:border-zinc-800"></div></div>
+          <div className="relative flex justify-center text-xs font-black uppercase"><span className="px-4 bg-white dark:bg-zinc-900 text-zinc-400 tracking-widest">Or Securely</span></div>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => setShowRoleModal(true)}
+          className="w-full py-4 bg-white dark:bg-zinc-900 border-2 border-zinc-100 dark:border-zinc-800 text-zinc-900 dark:text-white font-black rounded-xl hover:border-zinc-900 dark:hover:border-white flex items-center justify-center gap-3 transition-all shadow-lg shadow-zinc-100 dark:shadow-none"
+        >
+          <svg className="w-5 h-5" viewBox="0 0 24 24">
+            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
+            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
+            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
+            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
+          </svg>
+          {googleLoading ? 'Connecting...' : 'Continue with Google'}
         </button>
       </form>
 
-      <p className="mt-8 text-center text-sm text-zinc-600 dark:text-zinc-400">
+      <p className="mt-8 text-center text-xs font-bold text-zinc-500">
         Already have an account?{' '}
-        <a href="/login" className="font-semibold text-zinc-900 dark:text-zinc-100 hover:underline underline-offset-4">
-          Sign in
-        </a>
+        <button onClick={() => router.push('/login')} className="text-zinc-900 dark:text-zinc-100 hover:underline">Sign In</button>
       </p>
     </div>
-
   )
 }
