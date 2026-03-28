@@ -9,10 +9,11 @@ export function AdminSidebar() {
 
   const navItems = [
     { name: 'Org Overview', href: '/dashboard/account_admin' },
-    { name: 'Team Members', href: '/dashboard/users' },
-    { name: 'Organization Alerts', href: '/dashboard/alerts' },
-    { name: 'Analytics', href: '/dashboard/analytics' },
-    { name: 'Org Settings', href: '/dashboard/settings' },
+    { name: 'Organization Alerts', href: '/dashboard/account_admin/alerts' },
+    { name: 'Analytics', href: '/dashboard/account_admin/analytics' },
+    { name: 'Notifications', href: '/dashboard/account_admin/notifications' },
+    { name: 'Org Settings', href: '/dashboard/account_admin/settings' },
+
   ]
 
   return (

@@ -9,8 +9,11 @@ export function ObserverSidebar() {
 
   const navItems = [
     { name: 'Observer View', href: '/dashboard/account_observer' },
-    { name: 'System Feed', href: '/dashboard/alerts' },
-    { name: 'Preferences', href: '/dashboard/settings' },
+    { name: 'System Feed', href: '/dashboard/account_observer/alerts' },
+    { name: 'Notifications', href: '/dashboard/account_observer/notifications' },
+    { name: 'Analytics', href: '/dashboard/account_observer/analytics' },
+    { name: 'Preferences', href: '/dashboard/account_observer/settings' },
+
   ]
 
   return (

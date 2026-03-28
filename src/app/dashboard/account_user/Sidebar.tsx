@@ -9,9 +9,11 @@ export function UserSidebar() {
 
   const navItems = [
     { name: 'Personal Dash', href: '/dashboard/account_user' },
-    { name: 'Alert List', href: '/dashboard/alerts' },
-    { name: 'Notifications', href: '/dashboard/notifications' },
-    { name: 'Profile Settings', href: '/dashboard/settings' },
+    { name: 'Alert List', href: '/dashboard/account_user/alerts' },
+    { name: 'Analytics', href: '/dashboard/account_user/analytics' },
+    { name: 'Notifications', href: '/dashboard/account_user/notifications' },
+    { name: 'Profile Settings', href: '/dashboard/account_user/settings' },
+
   ]
 
   return (

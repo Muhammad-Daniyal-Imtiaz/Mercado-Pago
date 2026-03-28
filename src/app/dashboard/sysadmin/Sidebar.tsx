@@ -9,10 +9,11 @@ export function SysAdminSidebar() {
 
   const navItems = [
     { name: 'Root Dashboard', href: '/dashboard/sysadmin' },
-    { name: 'System Analytics', href: '/dashboard/analytics' },
-    { name: 'Platform Users', href: '/dashboard/users' },
-    { name: 'Global Alerts', href: '/dashboard/alerts' },
-    { name: 'Settings', href: '/dashboard/settings' },
+    { name: 'System Analytics', href: '/dashboard/sysadmin/analytics' },
+    { name: 'Global Alerts', href: '/dashboard/sysadmin/alerts' },
+    { name: 'Notifications', href: '/dashboard/sysadmin/notifications' },
+    { name: 'Settings', href: '/dashboard/sysadmin/settings' },
+
   ]
 
   return (
