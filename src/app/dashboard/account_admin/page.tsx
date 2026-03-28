@@ -2,6 +2,8 @@ import RoleGuard from '@/components/auth/RoleGuard'
 import { UserProfile } from '@/components/dashboard/UserProfile'
 import { AlertList } from '@/components/alerts/AlertList'
 import InviteForm from '@/components/auth/InviteForm'
+import { OrganizationForm } from '@/components/dashboard/OrganizationForm'
+
 
 export default function AccountAdminDashboard() {
   return (
@@ -25,9 +27,11 @@ export default function AccountAdminDashboard() {
           </div>
           
           <div className="space-y-6">
-            <h2 className="text-2xl font-black text-zinc-900 dark:text-white tracking-tight uppercase">Invite Members</h2>
+            <h2 className="text-2xl font-black text-zinc-900 dark:text-white tracking-tight uppercase">Organization</h2>
+            <OrganizationForm />
             <InviteForm />
           </div>
+
         </div>
       </div>
     </RoleGuard>

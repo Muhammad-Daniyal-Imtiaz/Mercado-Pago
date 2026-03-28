@@ -4,7 +4,8 @@ import { NextResponse } from 'next/server'
 import { sendInvitationEmail } from '@/lib/email'
 
 export async function POST(request: Request) {
-  const { email, role } = await request.json()
+  const { email, role, organization_id } = await request.json()
+
   const supabase = await createClient()
 
   // 1. Get current user session
@@ -48,11 +49,12 @@ export async function POST(request: Request) {
     .upsert({
       email,
       role,
-      account_id: userData.account_id,
+      organization_id, // Link to the selected organization
       invited_by: user.id,
       token: otp,
       expires_at: expiresAt.toISOString(),
-    }, { onConflict: 'email,account_id' })
+    }, { onConflict: 'email,organization_id' })
+
 
   if (inviteError) {
     console.error('Invite DB Error:', inviteError)

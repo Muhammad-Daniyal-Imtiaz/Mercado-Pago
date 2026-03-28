@@ -32,7 +32,7 @@ export async function POST(request: Request) {
     options: {
       data: {
         role: invitation.role,
-        account_id: invitation.account_id,
+        organization_id: invitation.organization_id,
         full_name: fullName, // Pass the full name from the form
 
       },
