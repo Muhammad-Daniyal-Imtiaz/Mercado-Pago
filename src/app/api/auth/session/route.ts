@@ -16,11 +16,11 @@ export async function GET() {
     .from('users')
     .select(`
       *,
-      account:account_id (
-        name,
-        slug
+      organization:organization_id (
+        name
       )
     `)
+
     .eq('id', authUser.id)
     .single()
 
@@ -33,7 +33,7 @@ export async function GET() {
         fullName: authUser.user_metadata?.full_name || authUser.email,
         role: authUser.user_metadata?.role || 'account_user',
         isVerified: false,
-        account: null
+        organization: null
       }
     })
   }
@@ -45,10 +45,11 @@ export async function GET() {
       username: profile.username,
       fullName: profile.full_name,
       avatarUrl: profile.avatar_url,
-      role: profile.role, // This comes directly from public.users.role
+      role: profile.role, 
       isVerified: profile.is_verified,
       lastLogin: profile.last_login_at,
-      account: profile.account
+      organization: profile.organization
     }
   })
 }
+
