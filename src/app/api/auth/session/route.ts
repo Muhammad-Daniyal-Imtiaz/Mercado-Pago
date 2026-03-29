@@ -10,46 +10,54 @@ export async function GET() {
     return NextResponse.json({ user: null }, { status: 401 })
   }
 
-  // Use admin client to ensure we always get the profile role from the users table
   const adminClient = createAdminClient()
   const { data: profile, error: profileError } = await adminClient
     .from('users')
-    .select(`
-      *,
-      organization:organization_id (
-        name
-      )
-    `)
-
+    .select('*')
     .eq('id', authUser.id)
     .single()
 
   if (profileError || !profile) {
-    console.error('Profile fetch error:', profileError)
     return NextResponse.json({
       user: {
         id: authUser.id,
         email: authUser.email,
         fullName: authUser.user_metadata?.full_name || authUser.email,
         role: authUser.user_metadata?.role || 'account_user',
-        isVerified: false,
-        organization: null
+        organization: null,
+        memberships: []
       }
     })
   }
+
+  // Resolve all organizations the user is a member of
+  const userRoles = profile.roles || []
+  const { data: userOrgs } = await adminClient
+    .from('organizations')
+    .select('id, name')
+    .in('id', userRoles.map((r: any) => r.organization_id))
+
+  const memberships = userRoles.map((r: any) => {
+    const org = userOrgs?.find(o => o.id === r.organization_id)
+    return {
+      organization_id: r.organization_id,
+      name: org?.name || 'Unknown Portal',
+      role: r.role
+    }
+  })
+
+  // The active session is based on the current profile row's organization_id
+  const activeOrg = memberships.find(m => m.organization_id === profile.organization_id) || memberships[0] || null
 
   return NextResponse.json({
     user: {
       id: profile.id,
       email: profile.email,
-      username: profile.username,
       fullName: profile.full_name,
       avatarUrl: profile.avatar_url,
-      role: profile.role, 
-      isVerified: profile.is_verified,
-      lastLogin: profile.last_login_at,
-      organization: profile.organization
+      role: activeOrg?.role || profile.role,
+      organization: activeOrg,
+      memberships: memberships
     }
   })
 }
-

@@ -18,7 +18,8 @@ export async function POST(request: Request) {
   const adminClient = createAdminClient()
   const { data: userData, error: userError } = await adminClient
     .from('users')
-    .select('role, account_id, full_name, email')
+    .select('role, organization_id, full_name, email')
+
     .eq('id', user.id)
     .single()
 
@@ -35,9 +36,11 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 })
   }
 
-  if (!userData.account_id && userData.role !== 'sysadmin') {
-     return NextResponse.json({ error: 'Account not associated with admin' }, { status: 400 })
+  // Check if they are part of an organization (sysadmins can bypass)
+  if (!userData.organization_id && userData.role !== 'sysadmin') {
+     return NextResponse.json({ error: 'No organization linked to this admin' }, { status: 400 })
   }
+
 
   // 3. Generate 6-digit OTP
   const otp = Math.floor(100000 + Math.random() * 900000).toString()

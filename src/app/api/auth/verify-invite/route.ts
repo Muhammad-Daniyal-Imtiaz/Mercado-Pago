@@ -31,11 +31,20 @@ export async function POST(request: Request) {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return { data: null, error: { message: 'Authentication required' } }
       
+      // Get existing user roles
+      const { data: profile } = await adminClient.from('users').select('roles').eq('id', user.id).single()
+      const currentRoles = profile?.roles || []
+      const newRole = { organization_id: invitation.organization_id, role: invitation.role }
+
+      // Append new role to the array (don't overwrite!)
+      const updatedRoles = [...currentRoles.filter((r: any) => r.organization_id !== invitation.organization_id), newRole]
+
       const { error: updateError } = await adminClient
         .from('users')
         .update({
-          role: invitation.role,
-          organization_id: invitation.organization_id,
+          roles: updatedRoles,
+          role: invitation.role, // Set as active role for now
+          organization_id: invitation.organization_id, // Set as active organization for now
           full_name: fullName || user.user_metadata?.full_name
         })
         .eq('id', user.id)
@@ -43,6 +52,7 @@ export async function POST(request: Request) {
       if (updateError) return { data: null, error: updateError }
       return { data: { user }, error: null }
     }
+
 
     // Otherwise, perform standard Email/Password signup
     return await supabase.auth.signUp({

@@ -7,6 +7,8 @@ import Link from 'next/link'
 export function Header() {
   const router = useRouter()
   const [user, setUser] = useState<any>(null)
+  const [switching, setSwitching] = useState(false)
+  const [showOrgDropdown, setShowOrgDropdown] = useState(false)
 
   useEffect(() => {
     fetch('/api/auth/session')
@@ -21,6 +23,28 @@ export function Header() {
     router.push('/login')
   }
 
+  const handleSwitchOrg = async (orgId: string) => {
+    if (orgId === user.organization?.organization_id) return
+    
+    setSwitching(true)
+    setShowOrgDropdown(false)
+    try {
+      const res = await fetch('/api/auth/switch-org', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ organization_id: orgId }),
+      })
+      if (res.ok) {
+        // Refresh the whole page to load the new role-specific sidebar and pages
+        window.location.href = '/dashboard'
+      }
+    } catch (err) {
+      console.error('Switch failed:', err)
+    } finally {
+      setSwitching(false)
+    }
+  }
+
   return (
     <header className="sticky top-0 z-50 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md border-b border-zinc-200 dark:border-zinc-800 transition-colors">
       <div className="max-w-7xl mx-auto flex justify-between items-center px-6 py-4">
@@ -31,13 +55,60 @@ export function Header() {
           </Link>
           
           {user && user.organization && (
-            <div className="flex items-center">
-              <div className="h-6 w-px bg-zinc-200 dark:bg-zinc-800 mx-4 hidden md:block" />
-              <div className="hidden md:flex flex-col">
-                <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400 leading-none mb-1">Current Portal</span>
-                <span className="text-sm font-black text-zinc-900 dark:text-white uppercase tracking-tighter italic">
-                  {user.organization.name} <span className="text-zinc-600 dark:text-zinc-400 mx-1">/</span> {user.role.replace('_', ' ')}
-                </span>
+            <div className="flex items-center relative gap-4">
+              <div className="h-6 w-px bg-zinc-200 dark:bg-zinc-800 mx-1 hidden md:block" />
+              
+              <div className="relative">
+                <button 
+                  onClick={() => user.memberships?.length > 1 && setShowOrgDropdown(!showOrgDropdown)}
+                  className={`flex flex-col text-left group transition-all ${user.memberships?.length > 1 ? 'cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-800 p-2 rounded-xl' : 'pointer-events-none'}`}
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400 opacity-60">Current Portal</span>
+                    {user.memberships?.length > 1 && (
+                      <span className="text-[8px] bg-red-600 text-white px-1.5 py-0.5 rounded font-black animate-pulse uppercase">Invite Pending</span>
+                    )}
+                  </div>
+                  <span className="text-sm font-black text-zinc-900 dark:text-white uppercase tracking-tighter italic flex items-center gap-1.5">
+                    {user.organization.name} 
+                    <span className="text-zinc-600 dark:text-zinc-400 no-italic opacity-40 font-light">/</span> 
+                    {user.role.replace('_', ' ')}
+                    {user.memberships?.length > 1 && (
+                      <svg className={`w-3 h-3 transition-transform ${showOrgDropdown ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    )}
+                  </span>
+                </button>
+
+                {/* Organization Switcher Dropdown */}
+                {showOrgDropdown && user.memberships && (
+                  <div className="absolute top-full left-0 mt-2 w-72 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-2xl p-2 z-[60] animate-in slide-in-from-top-2">
+                    <p className="px-3 pt-2 pb-4 text-[10px] font-black uppercase tracking-widest text-zinc-400 border-b border-zinc-100 dark:border-zinc-800 mb-2">Switch Organization</p>
+                    <div className="space-y-1">
+                      {user.memberships.map((m: any) => (
+                        <button
+                          key={m.organization_id}
+                          onClick={() => handleSwitchOrg(m.organization_id)}
+                          disabled={switching}
+                          className={`w-full text-left p-3 rounded-xl transition-all flex items-center justify-between group ${
+                            m.organization_id === user.organization?.organization_id 
+                              ? 'bg-zinc-100 dark:bg-zinc-800 cursor-default' 
+                              : 'hover:bg-zinc-50 dark:hover:bg-zinc-800/50'
+                          }`}
+                        >
+                          <div className="flex flex-col">
+                            <span className="font-black text-xs uppercase tracking-tight text-zinc-900 dark:text-white">{m.name}</span>
+                            <span className="text-[10px] font-medium text-zinc-500 italic">{m.role.replace('_', ' ')}</span>
+                          </div>
+                          {m.organization_id === user.organization?.organization_id && (
+                            <div className="w-1.5 h-1.5 bg-green-500 rounded-full shadow-[0_0_8px_rgba(34,197,94,0.6)]"></div>
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -53,21 +124,21 @@ export function Header() {
                     {user.fullName}
                   </p>
                   <p className="text-[10px] uppercase tracking-widest text-zinc-500 font-bold">
-                    {user.role.replace('_', ' ')}
+                    Profile Identity
                   </p>
                 </div>
                 {user.avatarUrl ? (
                   <img src={user.avatarUrl} alt={user.fullName} className="w-10 h-10 rounded-full ring-2 ring-zinc-100 dark:ring-zinc-800 border-none" />
                 ) : (
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center text-white font-bold shadow-lg">
-                    {user.fullName.charAt(0)}
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center text-white font-bold shadow-lg ring-2 ring-zinc-100 dark:ring-zinc-800">
+                    {user.fullName?.charAt(0) || user.email?.charAt(0)}
                   </div>
                 )}
               </div>
               <div className="h-6 w-px bg-zinc-200 dark:bg-zinc-800" />
               <button
                 onClick={handleSignOut}
-                className="text-sm font-black uppercase tracking-widest text-red-600 hover:text-red-700 transition-colors"
+                className="text-xs font-black uppercase tracking-widest text-red-600 hover:text-red-700 transition-colors"
               >
                 Sign out
               </button>
@@ -75,6 +146,12 @@ export function Header() {
           )}
         </div>
       </div>
+      
+      {switching && (
+        <div className="absolute inset-0 bg-white/40 dark:bg-black/40 backdrop-blur-[2px] z-[70] flex items-center justify-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-2 border-zinc-900 dark:border-white border-t-transparent"></div>
+        </div>
+      )}
     </header>
   )
 }

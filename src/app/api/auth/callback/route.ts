@@ -21,10 +21,12 @@ export async function GET(request: Request) {
       const { data: pendingInvite } = await admin.from('invitations').select('*').eq('email', user.email).single()
       const { data: existingProfile } = await admin.from('users').select('*').eq('id', user.id).single()
 
-      if (pendingInvite && (!existingProfile || !existingProfile.role || existingProfile.role === 'account_user')) {
-        // Redirection to the UNIFIED verification screen for invited users
+      if (pendingInvite) {
+        // Even if they are already registered in Org A, if there is a pending invite to Org B,
+        // we must send them to the OTP verification screen to "claim" the second membership.
         return NextResponse.redirect(`${origin}/verify-email?email=${user.email}&provider=google`)
       }
+
 
 
       // Normal path: Force role update based on what they selected in the UI modal
