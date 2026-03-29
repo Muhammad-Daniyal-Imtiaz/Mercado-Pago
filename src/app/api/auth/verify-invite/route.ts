@@ -63,8 +63,34 @@ export async function POST(request: Request) {
   }
 
 
-  // 4. Delete the invitation now that it's used
+  // 4. Update Organization Members JSONB - Keep all members in a single array
+  if (invitation.organization_id) {
+    const { data: org } = await adminClient
+      .from('organizations')
+      .select('members')
+      .eq('id', invitation.organization_id)
+      .single()
+      
+    const currentMembers = org?.members || []
+    const newMember = {
+      id: authData?.user?.id || 'pending',
+      email: email,
+      role: invitation.role,
+      joined_at: new Date().toISOString()
+    }
+
+    // append new member if not already there (prevent duplicates)
+    if (!currentMembers.some((m: any) => m.email === email)) {
+      await adminClient
+        .from('organizations')
+        .update({ members: [...currentMembers, newMember] })
+        .eq('id', invitation.organization_id)
+    }
+  }
+
+  // 5. Delete the invitation now that it's used
   await adminClient.from('invitations').delete().eq('id', invitation.id)
+
 
   return NextResponse.json({ 
     success: true, 

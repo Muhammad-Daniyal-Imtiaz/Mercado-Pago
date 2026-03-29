@@ -35,15 +35,24 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 })
   }
 
-  // 3. Create organization - use ADMIN client
+  // 3. Create organization with initial member JSONB array
   const { data: orgData, error: orgError } = await adminClient
     .from('organizations')
     .insert({
       name,
-      created_by: user.id
+      created_by: user.id,
+      members: [
+        {
+          id: user.id,
+          email: user.email,
+          role: userData.role,
+          full_name: userData.full_name || user.email
+        }
+      ]
     })
     .select()
     .single()
+
 
   if (orgError) {
     console.error('Org Insert Error:', orgError)
