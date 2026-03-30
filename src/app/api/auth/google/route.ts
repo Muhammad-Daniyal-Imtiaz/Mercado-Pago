@@ -10,10 +10,14 @@ export async function GET(request: Request) {
     provider: 'google',
     options: {
       redirectTo: `${origin}/api/auth/callback?role=${role}`,
+      queryParams: {
+        prompt: 'select_account',
+      },
       data: {
         role: role
       }
     } as any,
+
   })
 
 
