@@ -25,37 +25,40 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Invitation has expired' }, { status: 400 })
   }
 
-  const { data: authData, error: authError } = await (async () => {
-    // If user is already authenticated with Google, we just update their profile
-    if (request.headers.get('x-provider') === 'google') {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return { data: null, error: { message: 'Authentication required' } }
-      
-      // Get existing user roles
-      const { data: profile } = await adminClient.from('users').select('roles').eq('id', user.id).single()
-      const currentRoles = profile?.roles || []
-      const newRole = { organization_id: invitation.organization_id, role: invitation.role }
+  let authData: { user?: any } = {}
+  let authError: Error | null = null
 
-      // Append new role to the array (don't overwrite!)
-      const updatedRoles = [...currentRoles.filter((r: { organization_id: string }) => r.organization_id !== invitation.organization_id), newRole]
-
-      const { error: updateError } = await adminClient
-        .from('users')
-        .update({
-          roles: updatedRoles,
-          role: invitation.role, // Set as active role for now
-          organization_id: invitation.organization_id, // Set as active organization for now
-          full_name: fullName || user.user_metadata?.full_name
-        })
-        .eq('id', user.id)
-        
-      if (updateError) return { data: null, error: updateError }
-      return { data: { user }, error: null }
+  // 3. Handle authentication
+  if (request.headers.get('x-provider') === 'google') {
+    // Google user - update profile
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) {
+      return NextResponse.json({ error: 'Authentication required' }, { status: 401 })
     }
+    
+    // Get existing user roles
+    const { data: profile } = await adminClient.from('users').select('roles').eq('id', user.id).single()
+    const currentRoles = profile?.roles || []
+    const newRole = { organization_id: invitation.organization_id, role: invitation.role }
 
+    // Append new role to the array
+    const updatedRoles = [...currentRoles.filter((r: { organization_id: string }) => r.organization_id !== invitation.organization_id), newRole]
 
-    // Otherwise, perform standard Email/Password signup
-    return await supabase.auth.signUp({
+    const { error: updateError } = await adminClient
+      .from('users')
+      .update({
+        roles: updatedRoles,
+        role: invitation.role,
+        organization_id: invitation.organization_id,
+        full_name: fullName || user.user_metadata?.full_name
+      })
+      .eq('id', user.id)
+
+    authData = { user }
+    authError = updateError
+  } else {
+    // Email/Password signup
+    const result = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -66,14 +69,15 @@ export async function POST(request: Request) {
         },
       },
     })
-  })()
-
-  if (authError) {
-    return NextResponse.json({ error: (authError as Error).message }, { status: 400 })
+    authData = result.data
+    authError = result.error
   }
 
+  if (authError) {
+    return NextResponse.json({ error: authError.message }, { status: 400 })
+  }
 
-  // 4. Update Organization Members JSONB - Keep all members in a single array
+  // 4. Update Organization Members
   if (invitation.organization_id) {
     const { data: org } = await adminClient
       .from('organizations')
@@ -83,13 +87,12 @@ export async function POST(request: Request) {
       
     const currentMembers = org?.members || []
     const newMember = {
-      id: authData?.user?.id || 'pending',
+      id: authData.user?.id || 'pending',
       email: email,
       role: invitation.role,
       joined_at: new Date().toISOString()
     }
 
-    // append new member if not already there (prevent duplicates)
     if (!currentMembers.some((m: { email: string }) => m.email === email)) {
       await adminClient
         .from('organizations')
@@ -98,12 +101,11 @@ export async function POST(request: Request) {
     }
   }
 
-  // 5. Delete the invitation now that it's used
+  // 5. Delete invitation
   await adminClient.from('invitations').delete().eq('id', invitation.id)
-
 
   return NextResponse.json({ 
     success: true, 
-    message: 'Registration complete. Please check your email for confirmation if required by Supabase auth settings.' 
+    message: 'Registration complete' 
   })
 }

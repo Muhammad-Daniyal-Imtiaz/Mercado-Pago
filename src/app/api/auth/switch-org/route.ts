@@ -20,7 +20,7 @@ export async function POST(request: Request) {
     .single()
 
   const userRoles = profile?.roles || []
-  const targetRole = userRoles.find((r: any) => r.organization_id === organization_id)
+  const targetRole = userRoles.find((r: { organization_id: string }) => r.organization_id === organization_id)
 
   if (!targetRole) {
     return NextResponse.json({ error: 'You are not a member of this organization' }, { status: 403 })

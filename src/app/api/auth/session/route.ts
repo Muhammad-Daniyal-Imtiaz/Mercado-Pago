@@ -38,7 +38,7 @@ export async function GET() {
     .in('id', userRoles.map((r: { organization_id: string }) => r.organization_id))
 
   const memberships = userRoles.map((r: { organization_id: string; role: string }) => {
-    const org = userOrgs?.find(o => o.id === r.organization_id)
+    const org = userOrgs?.find((o: { id: string }) => o.id === r.organization_id)
     return {
       organization_id: r.organization_id,
       name: org?.name || 'Unknown Portal',
