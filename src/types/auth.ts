@@ -19,7 +19,7 @@ export interface Account {
   name: string;
   slug: string;
   logo_url?: string;
-  settings: any;
+  settings: Record<string, unknown>;
   is_active: boolean;
   created_at: string;
   updated_at: string;

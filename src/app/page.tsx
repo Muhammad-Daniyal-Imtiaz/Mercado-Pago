@@ -12,9 +12,7 @@ import {
   CreditCard,
   Eye,
   Smartphone,
-  Globe,
   Star,
-  TrendingUp,
   Lock,
   Clock,
   ChevronRight
