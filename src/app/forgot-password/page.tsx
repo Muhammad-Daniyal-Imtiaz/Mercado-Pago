@@ -20,8 +20,8 @@ export default function ForgotPasswordPage() {
       const data = await res.json()
       if (!res.ok) throw new Error(data.error)
       setSubmitted(true)
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'An error occurred')
     }
   }
 

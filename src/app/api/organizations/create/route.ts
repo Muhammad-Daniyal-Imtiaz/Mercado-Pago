@@ -17,7 +17,7 @@ export async function POST(request: Request) {
   // 2. Fetch user's profile to confirm role - use ADMIN client to bypass RLS
   const { data: userData, error: userError } = await adminClient
     .from('users')
-    .select('role')
+    .select('role, full_name')
     .eq('id', user.id)
     .single()
 

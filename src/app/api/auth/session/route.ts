@@ -35,9 +35,9 @@ export async function GET() {
   const { data: userOrgs } = await adminClient
     .from('organizations')
     .select('id, name')
-    .in('id', userRoles.map((r: any) => r.organization_id))
+    .in('id', userRoles.map((r: { organization_id: string }) => r.organization_id))
 
-  const memberships = userRoles.map((r: any) => {
+  const memberships = userRoles.map((r: { organization_id: string; role: string }) => {
     const org = userOrgs?.find(o => o.id === r.organization_id)
     return {
       organization_id: r.organization_id,
@@ -47,7 +47,7 @@ export async function GET() {
   })
 
   // The active session is based on the current profile row's organization_id
-  const activeOrg = memberships.find(m => m.organization_id === profile.organization_id) || memberships[0] || null
+  const activeOrg = memberships.find((m: { organization_id: string }) => m.organization_id === profile.organization_id) || memberships[0] || null
 
   return NextResponse.json({
     user: {

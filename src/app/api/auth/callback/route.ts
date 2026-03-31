@@ -7,7 +7,7 @@ export async function GET(request: Request) {
   const code = searchParams.get('code')
   const role = searchParams.get('role') || 'account_user'
   
-  let next = searchParams.get('next') ?? '/dashboard'
+  const nextUrl = searchParams.get('next') ?? '/dashboard'
 
   if (code) {
     const supabase = await createClient()

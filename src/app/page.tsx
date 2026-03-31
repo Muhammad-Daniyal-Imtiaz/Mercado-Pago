@@ -1,269 +1,436 @@
 "use client";
 
-import Link from "next/link";
 import { useState, useEffect } from "react";
 import { 
   Shield, 
-  Target, 
   Bell, 
-  Building2, 
-  Mail, 
-  BarChart3,
-  ArrowRight,
-  LayoutDashboard,
-  LogIn,
-  UserPlus,
-  ChevronRight,
+  Users, 
   CheckCircle2,
-  Sparkles,
-  Users,
   Zap,
-  Activity
+  ArrowRight,
+  MessageCircle,
+  CreditCard,
+  Eye,
+  Smartphone,
+  Star,
+  Lock,
+  Clock,
+  ChevronRight
 } from "lucide-react";
 
 export default function Home() {
-  const [user, setUser] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
-    async function fetchUser() {
-      try {
-        const res = await fetch('/api/auth/session');
-        const data = await res.json();
-        if (data.user) {
-          setUser(data.user);
-        }
-      } catch (err) {
-        console.error('Session fetch failed:', err);
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchUser();
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-900 to-black">
+  const plans = [
+    {
+      name: "Básico",
+      price: "$24.999",
+      period: "/mes",
+      description: "Perfecto para pequeños negocios",
+      features: [
+        "Hasta 3 usuarios observadores",
+        "Notificaciones en tiempo real",
+        "Webhook + REST API",
+        "Soporte por email",
+        "Dashboard básico"
+      ],
+      color: "from-gray-600 to-gray-700",
+      popular: false
+    },
+    {
+      name: "Profesional",
+      price: "$49.999",
+      period: "/mes",
+      description: "Ideal para negocios en crecimiento",
+      features: [
+        "Hasta 10 usuarios observadores",
+        "Notificaciones multi-dispositivo",
+        "Webhook + REST + WebSockets",
+        "Soporte prioritario",
+        "Analytics avanzado",
+        "Exportación de datos"
+      ],
+      color: "from-blue-600 to-purple-600",
+      popular: true
+    },
+    {
+      name: "Enterprise",
+      price: "Personalizado",
+      period: "",
+      description: "Para grandes empresas",
+      features: [
+        "Usuarios ilimitados",
+        "Notificaciones personalizadas",
+        "API completa dedicada",
+        "Soporte 24/7",
+        "Dashboard personalizado",
+        "Integraciones a medida",
+        "SLA garantizado"
+      ],
+      color: "from-purple-600 to-pink-600",
+      popular: false
+    }
+  ];
 
+  const features = [
+    {
+      icon: Shield,
+      title: "Verificación Real",
+      description: "Confirmación auténtica de pagos recibidos, eliminando comprobantes falsos",
+      color: "from-green-500 to-emerald-600"
+    },
+    {
+      icon: Bell,
+      title: "Notificaciones Instantáneas",
+      description: "Recibe alertas en tiempo real cuando llegan los pagos a tu cuenta",
+      color: "from-blue-500 to-cyan-600"
+    },
+    {
+      icon: Users,
+      title: "Múltiples Observadores",
+      description: "Invita a tu equipo para que monitoreen los ingresos desde sus dispositivos",
+      color: "from-purple-500 to-pink-600"
+    },
+    {
+      icon: Eye,
+      title: "Visibilidad Total",
+      description: "Control completo sobre quién puede ver las notificaciones de pagos",
+      color: "from-orange-500 to-red-600"
+    },
+    {
+      icon: Smartphone,
+      title: "Multiplataforma",
+      description: "Recibe alertas en web, móvil y desktop donde necesites",
+      color: "from-indigo-500 to-purple-600"
+    },
+    {
+      icon: Lock,
+      title: "Seguridad Garantizada",
+      description: "Encriptación de extremo a extremo y autenticación segura",
+      color: "from-gray-600 to-gray-700"
+    }
+  ];
+
+  const stats = [
+    { value: "99.9%", label: "Uptime Garantizado", icon: CheckCircle2 },
+    { value: "< 15s", label: "Tiempo de Notificación", icon: Zap },
+    { value: "24/7", label: "Monitoreo Activo", icon: Clock },
+    { value: "100%", label: "Precisión Verificada", icon: Shield }
+  ];
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-gray-900 text-white">
+      
       {/* Navigation */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-black/50 backdrop-blur-xl border-b border-white/10">
+      <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        isScrolled ? 'bg-black/80 backdrop-blur-xl border-b border-white/10' : 'bg-transparent'
+      }`}>
         <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
-              <span className="text-white font-bold text-xl">A</span>
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl flex items-center justify-center">
+              <CreditCard className="w-6 h-6 text-white" />
             </div>
-            <span className="text-white font-bold text-xl">AlertFlow</span>
+            <div>
+              <span className="text-white font-bold text-xl">Pay</span>
+              <span>-</span>
+              <span className="text-blue-400 font-bold text-xl">Alert</span>
+              <span className="text-gray-400 text-sm ml-1">.com.ar</span>
+            </div>
           </div>
           
           <div className="hidden md:flex items-center gap-8">
-            <Link href="#features" className="text-gray-300 hover:text-white transition-colors">Features</Link>
-            <Link href="#pricing" className="text-gray-300 hover:text-white transition-colors">Pricing</Link>
-            <Link href="#about" className="text-gray-300 hover:text-white transition-colors">About</Link>
-            {user ? (
-              <Link 
-                href="/dashboard" 
-                className="px-5 py-2 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full text-white font-medium hover:opacity-90 transition-all flex items-center gap-2"
-              >
-                <LayoutDashboard className="w-4 h-4" />
-                Dashboard
-              </Link>
-            ) : (
-              <div className="flex gap-3">
-                <Link 
-                  href="/login" 
-                  className="px-5 py-2 text-white border border-white/20 rounded-full hover:bg-white/10 transition-all flex items-center gap-2"
-                >
-                  <LogIn className="w-4 h-4" />
-                  Sign In
-                </Link>
-                <Link 
-                  href="/signup" 
-                  className="px-5 py-2 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full text-white font-medium hover:opacity-90 transition-all flex items-center gap-2"
-                >
-                  <UserPlus className="w-4 h-4" />
-                  Get Started
-                </Link>
-              </div>
-            )}
+            <a href="#features" className="text-gray-300 hover:text-white transition-colors">Características</a>
+            <a href="#plans" className="text-gray-300 hover:text-white transition-colors">Planes</a>
+            <a href="#how" className="text-gray-300 hover:text-white transition-colors">Cómo Funciona</a>
+            <a 
+              href="https://wa.me/543876295801" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 px-5 py-2 bg-green-500 hover:bg-green-600 rounded-full text-white font-medium transition-all"
+            >
+              <MessageCircle className="w-4 h-4" />
+              Contactar
+            </a>
           </div>
         </div>
       </nav>
 
       {/* Hero Section */}
-      <main className="relative overflow-hidden">
+      <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
         {/* Animated Background */}
         <div className="absolute inset-0">
-          <div className="absolute top-0 -left-4 w-72 h-72 bg-purple-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
-          <div className="absolute top-0 -right-4 w-72 h-72 bg-yellow-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
-          <div className="absolute -bottom-8 left-20 w-72 h-72 bg-pink-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
+          <div className="absolute top-20 left-10 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute bottom-20 right-10 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl animate-pulse delay-2000"></div>
         </div>
 
-        <div className="relative max-w-7xl mx-auto px-6 pt-32 pb-20">
-          <div className="text-center">
-            {/* Badge */}
-            <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 mb-8 border border-white/20">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-              </span>
-              <span className="text-sm text-gray-300 flex items-center gap-1">
-                <Sparkles className="w-3 h-3" />
-                Platform Status: Operational
-              </span>
+        <div className="relative max-w-7xl mx-auto px-6 pt-20 pb-32 text-center">
+          {/* Trust Badge */}
+          <div className="inline-flex items-center gap-2 bg-green-500/10 backdrop-blur-sm rounded-full px-6 py-3 mb-8 border border-green-500/20">
+            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+            <span className="text-sm text-green-400 font-medium">
+              🇦🇷 100% Argentino • Integrado con Mercado Pago
+            </span>
+          </div>
+
+          {/* Main Heading */}
+          <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
+            Nunca más confíes en
+            <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">
+              comprobantes falsos
+            </span>
+          </h1>
+
+          {/* Subtitle */}
+          <p className="text-xl md:text-2xl text-gray-300 max-w-3xl mx-auto mb-8 leading-relaxed">
+            Recibe notificaciones <span className="text-blue-400 font-semibold">verificadas y en tiempo real&nbsp;</span> 
+             de cada pago que ingresa a tu cuenta de Mercado Pago. 
+            Ideal para dueños de negocios y sus equipos.
+          </p>
+
+          {/* CTA Buttons */}
+          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+            <a 
+              href="https://wa.me/543876295801" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="group px-8 py-4 bg-gradient-to-r from-green-500 to-green-600 rounded-full text-white font-semibold text-lg hover:shadow-lg hover:shadow-green-500/25 transition-all duration-300 transform hover:scale-105 flex items-center gap-3 justify-center"
+            >
+              <MessageCircle className="w-5 h-5" />
+              Hablar por WhatsApp
+              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+            </a>
+            <a 
+              href="#features" 
+              className="px-8 py-4 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full text-white font-semibold text-lg hover:bg-white/20 transition-all duration-300 flex items-center gap-3 justify-center"
+            >
+              <Star className="w-5 h-5" />
+              Ver Características
+            </a>
+          </div>
+
+          {/* Social Proof */}
+          <div className="flex items-center justify-center gap-8 text-gray-400">
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="w-5 h-5 text-green-400" />
+              <span>Notificaciones 100% verificadas</span>
             </div>
-
-            {/* Main Heading */}
-            <h1 className="text-5xl md:text-7xl font-bold text-white mb-6">
-              Intelligent Alert
-              <span className="block bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">
-                Management Platform
-              </span>
-            </h1>
-
-            {/* Description */}
-            <p className="text-lg md:text-xl text-gray-400 max-w-2xl mx-auto mb-10">
-              Transform how your team handles alerts with real-time notifications, 
-              smart routing, and actionable insights. Never miss a critical alert again.
-            </p>
-
-            {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
-              {!user && (
-                <>
-                  <Link
-                    href="/signup"
-                    className="group px-8 py-4 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full text-white font-semibold text-lg hover:shadow-lg hover:shadow-purple-500/25 transition-all duration-300 transform hover:scale-105 flex items-center gap-2 justify-center"
-                  >
-                    Start Free Trial
-                    <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                  </Link>
-                  <Link
-                    href="/login"
-                    className="px-8 py-4 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full text-white font-semibold text-lg hover:bg-white/20 transition-all duration-300 flex items-center gap-2 justify-center"
-                  >
-                    <LogIn className="w-5 h-5" />
-                    Sign In
-                  </Link>
-                </>
-              )}
-              {user && (
-                <Link
-                  href="/dashboard"
-                  className="group px-8 py-4 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full text-white font-semibold text-lg hover:shadow-lg hover:shadow-purple-500/25 transition-all duration-300 transform hover:scale-105 flex items-center gap-2 justify-center"
-                >
-                  <LayoutDashboard className="w-5 h-5" />
-                  Go to Dashboard
-                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                </Link>
-              )}
+            <div className="flex items-center gap-2">
+              <Zap className="w-5 h-5 text-yellow-400" />
+              <span>Alertas instantáneas</span>
             </div>
-
-            {/* Stats */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-3xl mx-auto">
-              {[
-                { label: "Active Users", value: "10,000+", icon: Users },
-                { label: "Alerts Processed", value: "1M+", icon: Activity },
-                { label: "Response Time", value: "< 2s", icon: Zap },
-                { label: "Uptime", value: "99.99%", icon: CheckCircle2 },
-              ].map((stat, idx) => (
-                <div key={idx} className="text-center group">
-                  <div className="w-12 h-12 bg-gradient-to-br from-blue-500/20 to-purple-600/20 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
-                    <stat.icon className="w-6 h-6 text-blue-400" />
-                  </div>
-                  <div className="text-2xl font-bold text-white">{stat.value}</div>
-                  <div className="text-sm text-gray-400">{stat.label}</div>
-                </div>
-              ))}
+            <div className="flex items-center gap-2">
+              <Shield className="w-5 h-5 text-blue-400" />
+              <span>Seguridad garantizada</span>
             </div>
           </div>
         </div>
-      </main>
+      </section>
 
-      {/* Features Section */}
-      <section id="features" className="py-20 relative">
+      {/* Stats Section */}
+      <section className="py-16 relative">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-white mb-4">
-              Powerful Features for Modern Teams
-            </h2>
-            <p className="text-gray-400 max-w-2xl mx-auto">
-              Everything you need to manage alerts efficiently and keep your team synchronized
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-8">
-            {[
-              {
-                title: "Role-Based Access",
-                description: "SysAdmin, AccountAdmin, AccountUser, and AccountObserver roles with granular permissions",
-                icon: Shield,
-                color: "from-blue-500 to-cyan-500"
-              },
-              {
-                title: "Smart Alert Routing",
-                description: "Automatic alert distribution based on user roles and organization hierarchy",
-                icon: Target,
-                color: "from-purple-500 to-pink-500"
-              },
-              {
-                title: "Real-time Notifications",
-                description: "Instant alerts via email, push notifications, and webhooks",
-                icon: Bell,
-                color: "from-orange-500 to-red-500"
-              },
-              {
-                title: "Organization Management",
-                description: "Create and manage multiple organizations with domain-based grouping",
-                icon: Building2,
-                color: "from-green-500 to-emerald-500"
-              },
-              {
-                title: "Invite System",
-                description: "Invite users with specific roles via email with secure OTP verification",
-                icon: Mail,
-                color: "from-yellow-500 to-orange-500"
-              },
-              {
-                title: "Analytics Dashboard",
-                description: "Comprehensive insights into alert patterns and team performance",
-                icon: BarChart3,
-                color: "from-indigo-500 to-purple-500"
-              }
-            ].map((feature, idx) => (
-              <div
-                key={idx}
-                className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/10 hover:border-white/20 transition-all hover:transform hover:scale-105 group"
-              >
-                <div className={`w-12 h-12 bg-gradient-to-r ${feature.color} rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
-                  <feature.icon className="w-6 h-6 text-white" />
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+            {stats.map((stat, idx) => (
+              <div key={idx} className="text-center group">
+                <div className="w-16 h-16 bg-gradient-to-br from-blue-500/20 to-purple-600/20 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                  <stat.icon className="w-8 h-8 text-blue-400" />
                 </div>
-                <h3 className="text-xl font-semibold text-white mb-2">{feature.title}</h3>
-                <p className="text-gray-400">{feature.description}</p>
+                <div className="text-3xl font-bold text-white mb-1">{stat.value}</div>
+                <div className="text-sm text-gray-400">{stat.label}</div>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* CTA Section */}
+      {/* Features Section */}
+      <section id="features" className="py-20 relative">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
+              Características que te dan
+              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">
+                total tranquilidad
+              </span>
+            </h2>
+            <p className="text-xl text-gray-300 max-w-3xl mx-auto">
+              Diseñado específicamente para negocios argentinos que usan Mercado Pago
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {features.map((feature, idx) => (
+              <div
+                key={idx}
+                className="bg-white/5 backdrop-blur-sm rounded-2xl p-8 border border-white/10 hover:border-white/20 transition-all hover:transform hover:scale-105 group"
+              >
+                <div className={`w-14 h-14 bg-gradient-to-r ${feature.color} rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform`}>
+                  <feature.icon className="w-7 h-7 text-white" />
+                </div>
+                <h3 className="text-xl font-semibold text-white mb-3">{feature.title}</h3>
+                <p className="text-gray-400 leading-relaxed">{feature.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* How It Works */}
+      <section id="how" className="py-20 relative bg-black/30 min-h-screen flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
+              Cómo funciona en
+              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">
+                3 simples pasos
+              </span>
+            </h2>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            {[
+              {
+                step: "01",
+                title: "Conecta tu Mercado Pago",
+                description: "Vincula tu cuenta de Mercado Pago de forma segura con nuestra plataforma",
+                icon: CreditCard
+              },
+              {
+                step: "02", 
+                title: "Invita a tu equipo",
+                description: "Agrega a tus empleados como observadores para que reciban las notificaciones",
+                icon: Users
+              },
+              {
+                step: "03",
+                title: "Recibe alertas verificadas",
+                description: "Todos reciben notificaciones instantáneas cuando llegan pagos reales",
+                icon: Bell
+              }
+            ].map((step, idx) => (
+              <div key={idx} className="relative">
+                <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-8 border border-white/10 hover:border-white/20 transition-all">
+                  <div className="text-4xl font-bold text-blue-400 mb-4">{step.step}</div>
+                  <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center mb-6">
+                    <step.icon className="w-6 h-6 text-white" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-white mb-3">{step.title}</h3>
+                  <p className="text-gray-400">{step.description}</p>
+                </div>
+                {idx < 2 && (
+                  <div className="hidden md:block absolute top-1/2 -right-4 transform -translate-y-1/2">
+                    <ChevronRight className="w-8 h-8 text-gray-600" />
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Pricing Section */}
+      <section id="plans" className="py-20 relative">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
+              Planes para cada
+              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">
+                tamaño de negocio
+              </span>
+            </h2>
+            <p className="text-xl text-gray-300 max-w-3xl mx-auto">
+              Elige el plan perfecto según la cantidad de usuarios que necesites
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            {plans.map((plan, idx) => (
+              <div
+                key={idx}
+                className={`relative bg-white/5 backdrop-blur-sm rounded-2xl border ${
+                  plan.popular 
+                    ? 'border-blue-500 shadow-2xl shadow-blue-500/20 scale-105' 
+                    : 'border-white/10'
+                } hover:border-white/20 transition-all`}
+              >
+                {plan.popular && (
+                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                    <div className="bg-gradient-to-r from-blue-500 to-purple-600 px-4 py-1 rounded-full text-sm font-semibold text-white">
+                      Más Popular
+                    </div>
+                  </div>
+                )}
+                
+                <div className="p-8">
+                  <div className="text-center mb-8">
+                    <h3 className="text-2xl font-bold text-white mb-2">{plan.name}</h3>
+                    <p className="text-gray-400 mb-4">{plan.description}</p>
+                    <div className="flex items-baseline justify-center gap-1">
+                      <span className="text-4xl font-bold text-white">{plan.price}</span>
+                      <span className="text-gray-400">{plan.period}</span>
+                    </div>
+                  </div>
+
+                  <ul className="space-y-4 mb-8">
+                    {plan.features.map((feature, featureIdx) => (
+                      <li key={featureIdx} className="flex items-start gap-3">
+                        <CheckCircle2 className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" />
+                        <span className="text-gray-300">{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+
+                  <a 
+                    href="https://wa.me/543876295801" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className={`w-full block text-center px-6 py-3 rounded-full font-semibold transition-all ${
+                      plan.popular
+                        ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:shadow-lg hover:shadow-blue-500/25'
+                        : 'bg-white/10 text-white border border-white/20 hover:bg-white/20'
+                    }`}
+                  >
+                    {plan.name === "Enterprise" ? "Contactar Ventas" : "Comenzar Ahora"}
+                  </a>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Final CTA */}
       <section className="py-20 relative">
         <div className="max-w-4xl mx-auto px-6 text-center">
           <div className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 rounded-3xl p-12 border border-white/10 backdrop-blur-sm">
-            <h2 className="text-4xl font-bold text-white mb-4">
-              Ready to Transform Your Alert Management?
+            <h2 className="text-4xl font-bold text-white mb-6">
+              ¿Listo para eliminar el fraude de comprobantes?
             </h2>
             <p className="text-gray-300 mb-8 text-lg">
-              Join thousands of teams already using AlertFlow to streamline their alert workflow
+              Habla hoy mismo con nuestro equipo y recibe información al instante
             </p>
-            {!user && (
-              <Link
-                href="/signup"
-                className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full text-white font-semibold text-lg hover:shadow-lg hover:shadow-purple-500/25 transition-all duration-300"
-              >
-                Get Started Now
-                <ChevronRight className="w-5 h-5" />
-              </Link>
-            )}
+            <a 
+              href="https://wa.me/543876295801" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-green-500 to-green-600 rounded-full text-white font-semibold text-lg hover:shadow-lg hover:shadow-green-500/25 transition-all duration-300 transform hover:scale-105"
+            >
+              <MessageCircle className="w-6 h-6" />
+              Chatear por WhatsApp ahora
+              <ArrowRight className="w-5 h-5" />
+            </a>
+            <p className="text-gray-400 mt-4 text-sm">
+              Respuesta inmediata • Sin compromiso • 100% argentino
+            </p>
           </div>
         </div>
       </section>
@@ -272,38 +439,41 @@ export default function Home() {
       <footer className="border-t border-white/10 py-12">
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex flex-col md:flex-row justify-between items-center">
-            <div className="flex items-center gap-2 mb-4 md:mb-0">
-              <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">A</span>
+            <div className="flex items-center gap-3 mb-4 md:mb-0">
+              <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
+                <CreditCard className="w-5 h-5 text-white" />
               </div>
-              <span className="text-white font-semibold">AlertFlow</span>
-              <span className="text-gray-500 text-sm ml-2">© 2024</span>
+              <div>
+                <span className="text-white font-semibold">Pay Alert</span>
+                <span className="text-gray-400 text-sm ml-1">• {new Date().getFullYear()}</span>
+              </div>
             </div>
-            <div className="flex gap-6">
-              <Link href="#" className="text-gray-400 hover:text-white transition-colors">Privacy</Link>
-              <Link href="#" className="text-gray-400 hover:text-white transition-colors">Terms</Link>
-              <Link href="#" className="text-gray-400 hover:text-white transition-colors">Contact</Link>
-              <Link href="#" className="text-gray-400 hover:text-white transition-colors">Status</Link>
+            <div className="flex items-center gap-6 text-gray-400 text-sm">
+              <span>🇦🇷 Hecho en Argentina</span>
+              <span>•</span>
+              <span>Integrado con Mercado Pago</span>
+              <span>•</span>
+              <a href="https://wa.me/543876295801" className="hover:text-white transition-colors">
+                Soporte 24/7
+              </a>
             </div>
           </div>
         </div>
       </footer>
 
       <style jsx>{`
-        @keyframes blob {
-          0% { transform: translate(0px, 0px) scale(1); }
-          33% { transform: translate(30px, -50px) scale(1.1); }
-          66% { transform: translate(-20px, 20px) scale(0.9); }
-          100% { transform: translate(0px, 0px) scale(1); }
+        @keyframes pulse {
+          0%, 100% { opacity: 0.5; transform: scale(1); }
+          50% { opacity: 0.8; transform: scale(1.05); }
         }
-        .animate-blob {
-          animation: blob 7s infinite;
+        .animate-pulse {
+          animation: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
         }
-        .animation-delay-2000 {
+        .delay-1000 {
+          animation-delay: 1s;
+        }
+        .delay-2000 {
           animation-delay: 2s;
-        }
-        .animation-delay-4000 {
-          animation-delay: 4s;
         }
       `}</style>
     </div>

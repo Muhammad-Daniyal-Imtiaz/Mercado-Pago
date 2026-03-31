@@ -37,7 +37,7 @@ export async function POST(request: Request) {
       const newRole = { organization_id: invitation.organization_id, role: invitation.role }
 
       // Append new role to the array (don't overwrite!)
-      const updatedRoles = [...currentRoles.filter((r: any) => r.organization_id !== invitation.organization_id), newRole]
+      const updatedRoles = [...currentRoles.filter((r: { organization_id: string }) => r.organization_id !== invitation.organization_id), newRole]
 
       const { error: updateError } = await adminClient
         .from('users')
@@ -69,7 +69,7 @@ export async function POST(request: Request) {
   })()
 
   if (authError) {
-    return NextResponse.json({ error: (authError as any).message }, { status: 400 })
+    return NextResponse.json({ error: (authError as Error).message }, { status: 400 })
   }
 
 
@@ -90,7 +90,7 @@ export async function POST(request: Request) {
     }
 
     // append new member if not already there (prevent duplicates)
-    if (!currentMembers.some((m: any) => m.email === email)) {
+    if (!currentMembers.some((m: { email: string }) => m.email === email)) {
       await adminClient
         .from('organizations')
         .update({ members: [...currentMembers, newMember] })
