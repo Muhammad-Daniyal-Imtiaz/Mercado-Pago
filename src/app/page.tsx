@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import { 
   Shield, 
   Bell, 
@@ -10,12 +11,13 @@ import {
   ArrowRight,
   MessageCircle,
   CreditCard,
+  HousePlug,
   Eye,
   Smartphone,
   Star,
   Lock,
   Clock,
-  ChevronRight
+  ChevronRight,
 } from "lucide-react";
 
 export default function Home() {
@@ -135,8 +137,14 @@ export default function Home() {
       }`}>
         <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl flex items-center justify-center">
-              <CreditCard className="w-6 h-6 text-white" />
+            <div className="w-15 h-15 bg-gradient-to-r from-slate-100 to-white rounded-xl flex items-center justify-center">
+              <Image 
+                src="/assets/logo.png" 
+                alt="Pay-Alert" 
+                width={60} 
+                height={60}
+                className="rounded-lg"
+              />
             </div>
             <div>
               <span className="text-white font-bold text-xl">Pay</span>
@@ -296,39 +304,43 @@ export default function Home() {
             </h2>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-3 gap-12">
             {[
               {
                 step: "01",
                 title: "Conecta tu Mercado Pago",
                 description: "Vincula tu cuenta de Mercado Pago de forma segura con nuestra plataforma",
-                icon: CreditCard
+                icon: HousePlug
               },
               {
                 step: "02", 
                 title: "Invita a tu equipo",
-                description: "Agrega a tus empleados como observadores para que reciban las notificaciones",
+                description: "Asigna observadores para que reciban las notificaciones",
                 icon: Users
               },
               {
                 step: "03",
                 title: "Recibe alertas verificadas",
-                description: "Todos reciben notificaciones instantáneas cuando llegan pagos reales",
+                description: "Los asignados reciben notificaciones instantáneas cuando llegan pagos reales",
                 icon: Bell
               }
             ].map((step, idx) => (
               <div key={idx} className="relative">
-                <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-8 border border-white/10 hover:border-white/20 transition-all">
-                  <div className="text-4xl font-bold text-blue-400 mb-4">{step.step}</div>
-                  <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center mb-6">
-                    <step.icon className="w-6 h-6 text-white" />
+                <div className="bg-white/5 backdrop-blur-sm rounded-2xl flex flex-col p-8 border border-white/10 hover:border-white/20 transition-all">
+                  <div className="flex flex-row gap-12">
+                    <div className="w-17 h-17 bg-gradient-to-r from-blue-500 to-purple-700 rounded-md flex items-center justify-center mb-6">
+                      <step.icon className="w-12 h-12 text-white" />
+                    </div>
+                    <div className="text-6xl font-bold text-white mb-4">{step.step}</div>
                   </div>
-                  <h3 className="text-xl font-semibold text-white mb-3">{step.title}</h3>
-                  <p className="text-gray-400">{step.description}</p>
+                  <div className="flex flex-col">
+                    <h3 className="text-xl font-semibold text-white mb-3">{step.title}</h3>
+                    <p className="text-gray-400">{step.description}</p>
+                  </div>
                 </div>
                 {idx < 2 && (
-                  <div className="hidden md:block absolute top-1/2 -right-4 transform -translate-y-1/2">
-                    <ChevronRight className="w-8 h-8 text-gray-600" />
+                  <div className="hidden md:block absolute top-1/2 -right-14 transform -translate-y-1/2 z-10">
+                    <ChevronRight className="w-15 h-15 text-gray-300" />
                   </div>
                 )}
               </div>
