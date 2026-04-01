@@ -185,7 +185,7 @@ export default function Home() {
           <div className="inline-flex items-center gap-2 bg-green-500/10 backdrop-blur-sm rounded-full px-6 py-3 mb-8 border border-green-500/20">
             <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
             <span className="text-sm text-green-400 font-medium">
-              🇦🇷 100% Argentino • Integrado con Mercado Pago
+              Producto Argentino • Integrado con Mercado Pago
             </span>
           </div>
 
@@ -461,7 +461,7 @@ export default function Home() {
               </div>
             </div>
             <div className="flex items-center gap-6 text-gray-400 text-sm">
-              <span>🇦🇷 Hecho en Argentina</span>
+              <span>Producto Argentino</span>
               <span>•</span>
               <span>Integrado con Mercado Pago</span>
               <span>•</span>
