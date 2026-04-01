@@ -1,8 +1,29 @@
-<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect width="512" height="512" rx="128" fill="#3B82F6"/>
-  <rect x="64" y="128" width="384" height="256" rx="32" fill="#1E40AF"/>
-  <rect x="96" y="160" width="320" height="192" rx="16" fill="#60A5FA"/>
-  <text x="256" y="280" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="48" font-weight="bold">PA</text>
-  <circle cx="416" cy="96" r="24" fill="#10B981"/>
-  <path d="M408 88L416 96L424 88M408 104L416 96L424 104" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="100%" height="100%">
+            <defs>
+                <!-- Máscara para crear el espacio en blanco exacto entre el rayo y la campana -->
+                <mask id="recorte-rayo">
+                    <rect width="200" height="200" fill="white" />
+                    <!-- El stroke-width de 12 define el grosor de la línea blanca separadora -->
+                    <polygon points="116,24 56,92 104,92 64,160 144,72 96,72" fill="black" stroke="black" stroke-width="12" stroke-linejoin="miter" stroke-miterlimit="10"/>
+                </mask>
+            </defs>
+
+            <!-- Campana Base (Azul Oscuro) con la máscara de recorte aplicada -->
+            <g mask="url(#recorte-rayo)" fill="#0f4c81">
+                <!-- Cuerpo de la campana (curvas simétricas matemáticas) -->
+                <path d="M 100 36
+                         C 76 36, 64 52, 64 84
+                         C 64 120, 40 132, 32 144
+                         C 28 148, 30 152, 36 152
+                         L 164 152
+                         C 170 152, 172 148, 168 144
+                         C 160 132, 136 120, 136 84
+                         C 136 52, 124 36, 100 36 Z" />
+                
+                <!-- Badajo inferior (semicírculo) -->
+                <path d="M 80 152 v 2 a 20 16 0 0 0 40 0 v -2 Z" />
+            </g>
+
+            <!-- Rayo Frontal (Celeste) -->
+            <polygon points="116,24 56,92 104,92 64,160 144,72 96,72" fill="#1ea0e4" />
+        </svg>
