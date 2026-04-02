@@ -159,6 +159,12 @@ export default function Home() {
             <a href="#plans" className="text-gray-300 hover:text-white transition-colors">Planes</a>
             <a href="#how" className="text-gray-300 hover:text-white transition-colors">Cómo Funciona</a>
             <a 
+              href="/login" 
+              className="flex items-center gap-2 px-5 py-2 bg-blue-500 hover:bg-blue-600 rounded-full text-white font-medium transition-all"
+            >
+              Iniciar Sesión
+            </a>
+            <a 
               href="https://wa.me/543876295801" 
               target="_blank" 
               rel="noopener noreferrer"
@@ -206,6 +212,13 @@ export default function Home() {
 
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+            <a 
+              href="/login" 
+              className="group px-8 py-4 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full text-white font-semibold text-lg hover:shadow-lg hover:shadow-blue-500/25 transition-all duration-300 transform hover:scale-105 flex items-center gap-3 justify-center"
+            >
+              Iniciar Sesión
+              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+            </a>
             <a 
               href="https://wa.me/543876295801" 
               target="_blank" 
@@ -449,7 +462,7 @@ export default function Home() {
 
       {/* Footer */}
       <footer className="border-t border-white/10 py-12">
-        <div className="max-w-7xl mx-auto px-6">
+        <div className="mx-auto px-6">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="flex items-center gap-3 mb-4 md:mb-0">
               <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
