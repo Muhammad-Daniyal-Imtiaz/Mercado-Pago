@@ -9,13 +9,21 @@ export async function middleware(request: NextRequest) {
     '/features',
     '/plans', 
     '/how',
-    '/favicon.ico'
+    '/favicon.ico',
+    '/login',
+    '/signup',
+    '/forgot-password',
+    '/reset-password',
+    '/verify-email',
+    '/invite',
+    '/dashboard'
   ]
 
   // Si la ruta no está en las permitidas y no es un archivo estático, redirigir a home
   if (!allowedPaths.includes(pathname) && 
       !pathname.startsWith('/_next') && 
       !pathname.startsWith('/api') &&
+      !pathname.startsWith('/dashboard') &&
       !pathname.includes('.')) {
     return NextResponse.redirect(new URL('/', request.url))
   }

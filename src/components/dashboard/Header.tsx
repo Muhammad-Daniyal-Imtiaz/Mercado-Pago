@@ -47,11 +47,16 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-50 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md border-b border-zinc-200 dark:border-zinc-800 transition-colors">
-      <div className="max-w-7xl mx-auto flex justify-between items-center px-6 py-4">
+      <div className="mx-auto flex justify-between items-center px-6 py-4">
         {/* Left Side: Logo & Organization Context */}
         <div className="flex items-center gap-6">
           <Link href="/dashboard" className="text-2xl font-black tracking-tighter text-zinc-900 dark:text-white hover:opacity-80 transition-opacity">
-            ALERT<span className="text-blue-600">APP</span>
+            <div className="flex flex-row items-baseline">
+              <span className="dark:text-white text-black font-bold text-xl">Pay</span>
+              <span>-</span>
+              <span className="text-blue-400 font-bold text-xl">Alert</span>
+              <span className="text-gray-400 text-sm ml-1">.com.ar</span>
+            </div>
           </Link>
           
           {user && user.organization && (
@@ -116,7 +121,7 @@ export function Header() {
 
         {/* Right Side: User Profile & Actions */}
         <div className="flex items-center space-x-6">
-          {user && (
+          {user ? (
             <>
               <div className="flex items-center space-x-4">
                 <div className="text-right hidden sm:block">
@@ -124,7 +129,7 @@ export function Header() {
                     {user.fullName}
                   </p>
                   <p className="text-[10px] uppercase tracking-widest text-zinc-500 font-bold">
-                    Profile Identity
+                    {user.organization?.role ? user.organization.role.replace('_', ' ') : ''}
                   </p>
                 </div>
                 {user.avatarUrl ? (
@@ -142,6 +147,19 @@ export function Header() {
               >
                 Sign out
               </button>
+            </>
+          ) : (
+            /* Skeleton loading state */
+            <>
+              <div className="flex items-center space-x-4">
+                <div className="text-right hidden sm:block">
+                  <div className="w-24 h-4 bg-zinc-200 dark:bg-zinc-700 rounded animate-pulse mb-1"></div>
+                  <div className="w-16 h-3 bg-zinc-200 dark:bg-zinc-700 rounded animate-pulse"></div>
+                </div>
+                <div className="w-10 h-10 bg-zinc-200 dark:bg-zinc-700 rounded-full animate-pulse"></div>
+              </div>
+              <div className="h-6 w-px bg-zinc-200 dark:bg-zinc-800" />
+              <div className="w-16 h-4 bg-zinc-200 dark:bg-zinc-700 rounded animate-pulse"></div>
             </>
           )}
         </div>
