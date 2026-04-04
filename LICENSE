@@ -1,0 +1,83 @@
+MIT License
+
+Copyright (c) 2026 Pay Alert
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+---
+
+IMPORTANT NOTICE FOR COMMERCIAL USE:
+
+This software is the intellectual property of Pay Alert and is protected under
+Argentine Copyright Law (Law No. 11.723) and international copyright
+treaties.
+
+While this MIT license permits commercial use, redistribution, and modification,
+the following restrictions apply:
+
+1. **Trademark Usage**: The name "Pay Alert", logos, and branding elements
+   are registered trademarks and may not be used without explicit written permission
+   from Pay Alert.
+
+2. **Commercial Redistribution**: If you redistribute this software as part of a
+   commercial product or service, you must:
+   - Clearly attribute Pay Alert as the original software provider
+   - Not remove or obscure copyright notices
+   - Include a link to the original repository in your documentation
+
+3. **Patent Considerations**: While this software does not currently contain
+   patented technologies, Pay Alert reserves all rights to file patents on
+   novel implementations and algorithms contained herein.
+
+4. **No Warranty**: As stated in the MIT license, this software is provided
+   "AS IS" without any warranties. Pay Alert is not liable for any damages
+   arising from the use of this software.
+
+5. **Compliance**: Commercial users must comply with all applicable laws
+   and regulations, including but not limited to:
+   - Argentine Data Protection Law (Law No. 25.326)
+   - Payment Processing Regulations
+   - Consumer Protection Laws
+
+For commercial licensing inquiries or to obtain a commercial license with
+additional warranties and support, please contact:
+
+📧 Email: licensing@payalert.com.ar
+🌐 Website: https://payalert.com.ar
+📱 WhatsApp: +54 9 387 629-5801
+
+---
+
+DISCLAIMER:
+
+This software is designed to integrate with Mercado Pago's payment processing
+services. Pay Alert is not affiliated with, endorsed by, or sponsored by
+Mercado Pago. All Mercado Pago trademarks and service names are the
+property of their respective owners.
+
+Use of this software requires compliance with Mercado Pago's terms of service
+and applicable financial regulations. Users are responsible for ensuring compliance
+with all relevant legal and regulatory requirements in their jurisdiction.
+
+---
+
+Last updated: April 4, 2026
+License Version: MIT + Commercial Restrictions
+Jurisdiction: Argentina
+Contact: licensing@payalert.com.ar
