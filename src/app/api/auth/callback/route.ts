@@ -20,7 +20,7 @@ export async function GET(request: Request) {
   
   // Force production URL regardless of origin
   const baseUrl = isProduction 
-    ? 'https://www.pay-alert.com.ar'
+    ? 'https://pay-alert-tan.vercel.app'
     : origin
   
   console.log('Auth Callback - Is Production:', isProduction)
