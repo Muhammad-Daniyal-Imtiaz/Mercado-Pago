@@ -7,6 +7,12 @@ export async function GET(request: Request) {
   const code = searchParams.get('code')
   const role = searchParams.get('role') || 'account_user'
   
+  // Debug logging
+  console.log('Auth Callback - Full URL:', request.url)
+  console.log('Auth Callback - Origin:', origin)
+  console.log('Auth Callback - Code:', code)
+  console.log('Auth Callback - Role:', role)
+  
   // More reliable production detection
   const isProduction = process.env.NODE_ENV === 'production' || 
                        process.env.VERCEL_ENV === 'production' ||
@@ -14,21 +20,32 @@ export async function GET(request: Request) {
   
   // Force production URL regardless of origin
   const baseUrl = isProduction 
-    ? 'https://www.pay-alert.com.ar'
+    ? 'https://pay-alert-tan.vercel.app'
     : origin
   
-  // Debug logging
-  console.log('Auth Callback - Origin:', origin)
   console.log('Auth Callback - Is Production:', isProduction)
   console.log('Auth Callback - Base URL:', baseUrl)
   console.log('Auth Callback - NODE_ENV:', process.env.NODE_ENV)
   console.log('Auth Callback - VERCEL_ENV:', process.env.VERCEL_ENV)
 
   if (code) {
-    const supabase = await createClient()
-    const { data: { user }, error } = await supabase.auth.exchangeCodeForSession(code)
-    
-    if (!error && user) {
+    try {
+      const supabase = await createClient()
+      console.log('Auth Callback - Exchanging code for session...')
+      
+      const { data: { user }, error } = await supabase.auth.exchangeCodeForSession(code)
+      
+      console.log('Auth Callback - Exchange result:', { user: user?.email, error: error?.message })
+      
+      if (error) {
+        console.error('Auth Callback - Exchange error:', error)
+        return NextResponse.redirect(`${baseUrl}/login?error=exchange_failed`)
+      }
+      
+      if (!user) {
+        console.error('Auth Callback - No user returned')
+        return NextResponse.redirect(`${baseUrl}/login?error=no_user`)
+      }
       const admin = createAdminClient()
       
       // 1. Check if user has a pending invitation
@@ -61,6 +78,9 @@ export async function GET(request: Request) {
 
         return NextResponse.redirect(`${baseUrl}/dashboard/${role}`)
       }
+    } catch (error) {
+      console.error('Auth Callback - Unexpected error:', error)
+      return NextResponse.redirect(`${baseUrl}/login?error=unexpected_error`)
     }
   }
 
