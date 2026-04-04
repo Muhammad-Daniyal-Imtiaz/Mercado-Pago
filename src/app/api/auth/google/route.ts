@@ -5,8 +5,11 @@ export async function GET(request: Request) {
   const { origin, searchParams } = new URL(request.url)
   const role = searchParams.get('role') || 'account_user';
   
-  // Use production URL if available, otherwise fallback to origin
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || origin
+  // Always use the production URL in production, localhost in development
+  const baseUrl = process.env.NODE_ENV === 'production' 
+    ? 'https://pay-alert.com.ar' 
+    : origin
+  
   const supabase = await createClient()
 
   const { data, error } = await supabase.auth.signInWithOAuth({
@@ -18,7 +21,6 @@ export async function GET(request: Request) {
         access_type: 'offline',
       },
     },
-
   })
 
 

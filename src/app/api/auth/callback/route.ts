@@ -7,8 +7,10 @@ export async function GET(request: Request) {
   const code = searchParams.get('code')
   const role = searchParams.get('role') || 'account_user'
   
-  // Use production URL if available, otherwise fallback to origin
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || origin
+  // Always use the production URL in production, localhost in development
+  const baseUrl = process.env.NODE_ENV === 'production' 
+    ? 'https://pay-alert.com.ar' 
+    : origin
 
   if (code) {
     const supabase = await createClient()
