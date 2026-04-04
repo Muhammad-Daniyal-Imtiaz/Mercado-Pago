@@ -32,6 +32,8 @@ export async function GET(request: Request) {
         prompt: 'select_account',
         access_type: 'offline',
       },
+      // Skip browser redirect to handle it manually
+      skipBrowserRedirect: false,
     },
   })
 
