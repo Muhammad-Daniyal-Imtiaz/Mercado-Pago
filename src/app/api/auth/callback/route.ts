@@ -12,8 +12,9 @@ export async function GET(request: Request) {
                        process.env.VERCEL_ENV === 'production' ||
                        !origin.includes('localhost')
   
+  // Use the actual origin in production, fallback to hardcoded domain if needed
   const baseUrl = isProduction 
-    ? 'https://pay-alert.com.ar' 
+    ? (origin.includes('pay-alert.com.ar') ? origin : 'https://www.pay-alert.com.ar')
     : origin
   
   // Debug logging
