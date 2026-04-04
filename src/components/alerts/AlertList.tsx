@@ -41,13 +41,13 @@ export function AlertList({ limit }: AlertListProps) {
   }
 
   return (
-    <div className="bg-white rounded-lg shadow">
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
       <div className="p-4 border-b">
-        <h2 className="text-lg font-semibold">Recent Alerts</h2>
+        <h2 className="text-lg font-semibold">Alertas recientes</h2>
       </div>
       <div className="divide-y">
         {alerts.length === 0 ? (
-          <p className="p-4 text-gray-500">No alerts</p>
+          <p className="p-4 text-gray-500">Sin alertas</p>
         ) : (
           alerts.map(alert => (
             <div key={alert.id} className="p-4">

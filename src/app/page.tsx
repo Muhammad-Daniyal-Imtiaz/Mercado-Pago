@@ -465,8 +465,9 @@ export default function Home() {
         <div className="mx-auto px-6">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="flex items-center gap-3 mb-4 md:mb-0">
-              <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
-                <CreditCard className="w-5 h-5 text-white" />
+              <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center">
+                {/* logo favicon */}
+                <img src="/favicon.ico" alt="Pay Alert" className="w-10 h-10" />
               </div>
               <div>
                 <span className="text-white font-semibold">Pay Alert</span>
