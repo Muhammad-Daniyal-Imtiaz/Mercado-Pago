@@ -6,6 +6,9 @@ export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url)
   const code = searchParams.get('code')
   const role = searchParams.get('role') || 'account_user'
+  
+  // Use production URL if available, otherwise fallback to origin
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || origin
 
   if (code) {
     const supabase = await createClient()
@@ -22,14 +25,14 @@ export async function GET(request: Request) {
 
       // 3. Priority: If there is a pending invite, always send them to verify it first
       if (pendingInvite) {
-        return NextResponse.redirect(`${origin}/verify-email?email=${user.email}&provider=google`)
+        return NextResponse.redirect(`${baseUrl}/verify-email?email=${user.email}&provider=google`)
       }
 
       // 4. Handle Existing vs New User
       if (existingProfile && existingProfile.role) {
         // RETURNING USER: Don't overwrite their existing active organization
         // Just redirect to their current active dashboard
-        return NextResponse.redirect(`${origin}/dashboard/${existingProfile.role}`)
+        return NextResponse.redirect(`${baseUrl}/dashboard/${existingProfile.role}`)
       } else {
         // NEW USER (or missing role): Create initial profile
         await admin
@@ -42,11 +45,11 @@ export async function GET(request: Request) {
             roles: [{ organization_id: null, role: role }] // Initial empty role list maybe? 
           }, { onConflict: 'id' })
 
-        return NextResponse.redirect(`${origin}/dashboard/${role}`)
+        return NextResponse.redirect(`${baseUrl}/dashboard/${role}`)
       }
     }
   }
 
   // Redirect to an error page if authentication failed
-  return NextResponse.redirect(`${origin}/login?error=auth_callback_failed`)
+  return NextResponse.redirect(`${baseUrl}/login?error=auth_callback_failed`)
 }
