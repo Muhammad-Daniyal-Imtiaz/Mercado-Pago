@@ -7,10 +7,21 @@ export async function GET(request: Request) {
   const code = searchParams.get('code')
   const role = searchParams.get('role') || 'account_user'
   
-  // Always use the production URL in production, localhost in development
-  const baseUrl = process.env.NODE_ENV === 'production' 
+  // More reliable production detection
+  const isProduction = process.env.NODE_ENV === 'production' || 
+                       process.env.VERCEL_ENV === 'production' ||
+                       !origin.includes('localhost')
+  
+  const baseUrl = isProduction 
     ? 'https://pay-alert.com.ar' 
     : origin
+  
+  // Debug logging
+  console.log('Auth Callback - Origin:', origin)
+  console.log('Auth Callback - Is Production:', isProduction)
+  console.log('Auth Callback - Base URL:', baseUrl)
+  console.log('Auth Callback - NODE_ENV:', process.env.NODE_ENV)
+  console.log('Auth Callback - VERCEL_ENV:', process.env.VERCEL_ENV)
 
   if (code) {
     const supabase = await createClient()

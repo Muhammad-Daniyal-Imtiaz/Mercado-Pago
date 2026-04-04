@@ -5,10 +5,21 @@ export async function GET(request: Request) {
   const { origin, searchParams } = new URL(request.url)
   const role = searchParams.get('role') || 'account_user';
   
-  // Always use the production URL in production, localhost in development
-  const baseUrl = process.env.NODE_ENV === 'production' 
+  // More reliable production detection
+  const isProduction = process.env.NODE_ENV === 'production' || 
+                       process.env.VERCEL_ENV === 'production' ||
+                       !origin.includes('localhost')
+  
+  const baseUrl = isProduction 
     ? 'https://pay-alert.com.ar' 
     : origin
+  
+  // Debug logging
+  console.log('Auth Google - Origin:', origin)
+  console.log('Auth Google - Is Production:', isProduction)
+  console.log('Auth Google - Base URL:', baseUrl)
+  console.log('Auth Google - NODE_ENV:', process.env.NODE_ENV)
+  console.log('Auth Google - VERCEL_ENV:', process.env.VERCEL_ENV)
   
   const supabase = await createClient()
 
