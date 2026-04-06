@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
-export function Header() {
+export function Header({ onMenuClick }: { onMenuClick?: () => void }) {
   const router = useRouter()
   const [user, setUser] = useState<any>(null)
   const [switching, setSwitching] = useState(false)
@@ -49,19 +49,28 @@ export function Header() {
     <header className="sticky top-0 z-50 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md border-b border-zinc-200 dark:border-zinc-800 transition-colors">
       <div className="mx-auto flex justify-between items-center px-6 py-4">
         {/* Left Side: Logo & Organization Context */}
-        <div className="flex items-center gap-6">
-          <Link href="/dashboard" className="text-2xl font-black tracking-tighter text-zinc-900 dark:text-white hover:opacity-80 transition-opacity">
+        <div className="flex items-center gap-2 sm:gap-6">
+          <button 
+            className="md:hidden p-2 -ml-2 rounded-xl text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+            onClick={onMenuClick}
+          >
+            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16m-7 6h7" />
+            </svg>
+          </button>
+
+          <Link href="/dashboard" className="text-xl sm:text-2xl font-black tracking-tighter text-zinc-900 dark:text-white hover:opacity-80 transition-opacity whitespace-nowrap">
             <div className="flex flex-row items-baseline">
-              <span className="dark:text-white text-black font-bold text-xl">Pay</span>
+              <span className="dark:text-white text-black font-bold text-lg sm:text-xl">Pay</span>
               <span>-</span>
-              <span className="text-blue-400 font-bold text-xl">Alert</span>
-              <span className="text-gray-400 text-sm ml-1">.com.ar</span>
+              <span className="text-blue-400 font-bold text-lg sm:text-xl">Alert</span>
+              <span className="text-zinc-400 text-[10px] sm:text-sm ml-0.5">.com.ar</span>
             </div>
           </Link>
 
           {!user && (
-            <div className="flex items-center gap-4">
-              <div className="h-6 w-px bg-zinc-100 dark:bg-zinc-800 mx-1 hidden md:block" />
+            <div className="hidden sm:flex items-center gap-4">
+              <div className="h-6 w-px bg-zinc-100 dark:bg-zinc-800 mx-1" />
               <div className="space-y-1.5 container">
                 <div className="w-20 h-2 bg-zinc-100 dark:bg-zinc-800 rounded animate-pulse"></div>
                 <div className="w-32 h-4 bg-zinc-100 dark:bg-zinc-800 rounded animate-pulse"></div>
@@ -70,8 +79,8 @@ export function Header() {
           )}
 
           {user && user.organization && (
-            <div className="flex items-center relative gap-4">
-              <div className="h-6 w-px bg-zinc-200 dark:bg-zinc-800 mx-1 hidden md:block" />
+            <div className="hidden md:flex items-center relative gap-4">
+              <div className="h-6 w-px bg-zinc-200 dark:bg-zinc-800 mx-1" />
 
               <div className="relative">
                 <button
@@ -79,17 +88,15 @@ export function Header() {
                   className={`flex flex-col text-left group transition-all ${user.memberships?.length > 1 ? 'cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-800 p-2 rounded-xl' : 'pointer-events-none'}`}
                 >
                   <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400 opacity-60">Portal Actual</span>
+                    <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400 opacity-60">Portal</span>
                     {user.memberships?.length > 1 && (
                       <span className="text-[8px] bg-blue-600 text-white px-1.5 py-0.5 rounded font-black uppercase tracking-tighter">
-                        {user.memberships.length} Equipos
+                        {user.memberships.length}
                       </span>
                     )}
                   </div>
                   <span className="text-sm font-black text-zinc-900 dark:text-white uppercase tracking-tighter italic flex items-center gap-1.5">
                     {user.organization.name}
-                    <span className="text-zinc-600 dark:text-zinc-400 no-italic opacity-40 font-light">/</span>
-                    {user.role.replace('_', ' ')}
                     {user.memberships?.length > 1 && (
                       <svg className={`w-3 h-3 transition-transform ${showOrgDropdown ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M19 9l-7 7-7-7" />
@@ -131,10 +138,10 @@ export function Header() {
         </div>
 
         {/* Right Side: User Profile & Actions */}
-        <div className="flex items-center space-x-6">
+        <div className="flex items-center space-x-3 sm:space-x-6">
           {user ? (
             <>
-              <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-3 sm:space-x-4">
                 <div className="text-right hidden sm:block">
                   <p className="text-sm font-bold text-zinc-900 dark:text-white leading-tight">
                     {user.fullName}
@@ -144,9 +151,9 @@ export function Header() {
                   </p>
                 </div>
                 {user.avatarUrl ? (
-                  <img src={user.avatarUrl} alt={user.fullName} className="w-10 h-10 rounded-full ring-2 ring-zinc-100 dark:ring-zinc-800 border-none" />
+                  <img src={user.avatarUrl} alt={user.fullName} className="w-8 h-8 sm:w-10 sm:h-10 rounded-full ring-2 ring-zinc-100 dark:ring-zinc-800 border-none" />
                 ) : (
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center text-white font-bold shadow-lg ring-2 ring-zinc-100 dark:ring-zinc-800">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center text-white text-xs sm:text-base font-bold shadow-lg ring-2 ring-zinc-100 dark:ring-zinc-800">
                     {user.fullName?.charAt(0) || user.email?.charAt(0)}
                   </div>
                 )}
@@ -154,9 +161,13 @@ export function Header() {
               <div className="h-6 w-px bg-zinc-200 dark:bg-zinc-800" />
               <button
                 onClick={handleSignOut}
-                className="text-xs font-black uppercase tracking-widest text-red-600 hover:text-red-700 transition-colors"
+                title="Cerrar sesión"
+                className="p-2 sm:px-0 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/10 sm:hover:bg-transparent rounded-lg transition-colors flex items-center justify-center group"
               >
-                Cerrar sesión
+                <span className="hidden sm:inline text-xs font-black uppercase tracking-widest">Cerrar sesión</span>
+                <svg className="w-5 h-5 sm:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
               </button>
             </>
           ) : (

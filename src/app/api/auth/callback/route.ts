@@ -1,11 +1,19 @@
 import { createClient } from '@/utils/supabase/server'
 import { createAdminClient } from '@/utils/supabase/admin'
 import { NextResponse } from 'next/server'
+import { cookies } from 'next/headers'
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url)
   const code = searchParams.get('code')
-  const role = searchParams.get('role') || 'account_user'
+  
+  // Try to get role from cookie, fallback to param
+  const cookieStore = await cookies()
+  const roleFromCookie = cookieStore.get('auth_role')?.value
+  const role = roleFromCookie || searchParams.get('role') || 'account_user'
+  
+  // Consumir la cookie
+  if (roleFromCookie) cookieStore.delete('auth_role')
 
   // More reliable production detection
   const isProduction = process.env.NODE_ENV === 'production' ||
