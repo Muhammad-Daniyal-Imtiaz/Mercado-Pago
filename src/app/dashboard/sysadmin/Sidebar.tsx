@@ -9,11 +9,7 @@ export function SysAdminSidebar() {
 
   const navItems = [
     { name: 'Root Dashboard', href: '/dashboard/sysadmin' },
-    { name: 'System Analytics', href: '/dashboard/sysadmin/analytics' },
-    { name: 'Global Alerts', href: '/dashboard/sysadmin/alerts' },
-    { name: 'Notifications', href: '/dashboard/sysadmin/notifications' },
-    { name: 'Settings', href: '/dashboard/sysadmin/settings' },
-
+    { name: 'Settings', href: '/dashboard/sysadmin/settings' }
   ]
 
   return (
@@ -24,11 +20,10 @@ export function SysAdminSidebar() {
           <Link
             key={item.href}
             href={item.href}
-            className={`flex items-center px-4 py-2.5 rounded-xl transition-all font-bold ${
-              isActive(item.href)
-                ? 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 shadow-lg scale-[1.02]'
-                : 'text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800'
-            }`}
+            className={`flex items-center px-4 py-2.5 rounded-xl transition-all font-bold ${isActive(item.href)
+              ? 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 shadow-lg scale-[1.02]'
+              : 'text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800'
+              }`}
           >
             {item.name}
           </Link>
