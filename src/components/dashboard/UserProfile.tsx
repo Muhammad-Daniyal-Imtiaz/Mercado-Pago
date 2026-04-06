@@ -9,12 +9,20 @@ interface User {
   fullName: string
   avatarUrl: string | null
   role: string
-  account: {
+  organization: {
+    organization_id: string
     name: string
-    slug: string
+    role: string
+    status: string
   } | null
   isVerified: boolean
   lastLogin: string | null
+  memberships?: {
+    organization_id: string
+    name: string
+    role: string
+    status: string
+  }[]
 }
 
 export function UserProfile() {
@@ -44,71 +52,54 @@ export function UserProfile() {
     return (
       <div className="bg-white dark:bg-zinc-900 rounded-2xl shadow-sm p-8 border border-zinc-200 dark:border-zinc-800 transition-colors">
         <div className="flex flex-col md:flex-row md:items-center space-y-6 md:space-y-0 md:space-x-8">
-          {/* Skeleton Avatar */}
           <div className="relative">
-            <div className="w-24 h-24 rounded-2xl bg-zinc-200 dark:bg-zinc-700 animate-pulse"></div>
-            <div className="absolute -bottom-2 -right-2 px-3 py-1 bg-zinc-200 dark:bg-zinc-700 rounded-lg animate-pulse">
-              <div className="w-12 h-3 bg-zinc-300 dark:bg-zinc-600 rounded animate-pulse"></div>
-            </div>
+            <div className="w-24 h-24 rounded-2xl bg-zinc-100 dark:bg-zinc-800 animate-pulse"></div>
+            <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full border-4 border-white dark:border-zinc-900 bg-zinc-200 dark:bg-zinc-700 animate-pulse"></div>
           </div>
-
-          {/* Skeleton User Info */}
           <div className="flex-1 space-y-3">
-            <div className="flex items-center space-x-3">
-              <div className="w-48 h-8 bg-zinc-200 dark:bg-zinc-700 rounded animate-pulse"></div>
-              <div className="w-6 h-6 bg-zinc-200 dark:bg-zinc-700 rounded-full animate-pulse"></div>
-            </div>
-            <div className="w-32 h-5 bg-zinc-200 dark:bg-zinc-700 rounded animate-pulse"></div>
-            <div className="flex items-center space-x-2">
-              <div className="w-4 h-4 bg-zinc-200 dark:bg-zinc-700 rounded animate-pulse"></div>
-              <div className="w-40 h-4 bg-zinc-200 dark:bg-zinc-700 rounded animate-pulse"></div>
-            </div>
+            <div className="w-48 h-8 bg-zinc-100 dark:bg-zinc-800 rounded-lg animate-pulse"></div>
+            <div className="w-32 h-4 bg-zinc-100 dark:bg-zinc-800 rounded-lg animate-pulse"></div>
           </div>
-
-          {/* Skeleton Status */}
-          <div className="flex flex-col space-y-3 shrink-0">
-            <div className="p-4 bg-zinc-50 dark:bg-zinc-800/50 rounded-xl border border-zinc-100 dark:border-zinc-700/50">
-              <div className="w-12 h-3 bg-zinc-200 dark:bg-zinc-700 rounded animate-pulse mb-1"></div>
-              <div className="w-24 h-4 bg-zinc-200 dark:bg-zinc-700 rounded animate-pulse"></div>
-            </div>
+          <div className="hidden md:block space-y-2">
+            <div className="w-20 h-3 bg-zinc-100 dark:bg-zinc-800 rounded animate-pulse"></div>
+            <div className="w-32 h-5 bg-zinc-100 dark:bg-zinc-800 rounded animate-pulse"></div>
           </div>
-        </div>
-
-        {/* Skeleton Stats */}
-        <div className="mt-8 pt-8 border-t border-zinc-100 dark:border-zinc-800 grid grid-cols-2 md:grid-cols-4 gap-8">
-          <div>
-            <div className="w-16 h-3 bg-zinc-200 dark:bg-zinc-700 rounded animate-pulse mb-1"></div>
-            <div className="w-32 h-4 bg-zinc-200 dark:bg-zinc-700 rounded animate-pulse"></div>
-          </div>
-          <div>
-            <div className="w-20 h-3 bg-zinc-200 dark:bg-zinc-700 rounded animate-pulse mb-1"></div>
-            <div className="w-28 h-4 bg-zinc-200 dark:bg-zinc-700 rounded animate-pulse"></div>
-          </div>
-          <div>
-            <div className="w-16 h-3 bg-zinc-200 dark:bg-zinc-700 rounded animate-pulse mb-1"></div>
-            <div className="w-24 h-4 bg-zinc-200 dark:bg-zinc-700 rounded animate-pulse"></div>
+          <div className="hidden md:block space-y-2">
+            <div className="w-20 h-3 bg-zinc-100 dark:bg-zinc-800 rounded animate-pulse"></div>
+            <div className="w-32 h-5 bg-zinc-100 dark:bg-zinc-800 rounded animate-pulse"></div>
           </div>
         </div>
       </div>
     )
   }
 
-  if (!user) {
-    return null
-  }
+  if (!user) return null
 
   const getRoleBadgeColor = (role: string) => {
     switch (role) {
       case 'sysadmin': return { color: 'bg-purple-300', tooltip: "Administrador del sistema" }
       case 'account_admin': return { color: 'bg-blue-400', tooltip: "Administrador de cuenta" }
       case 'account_user': return { color: 'bg-green-300', tooltip: "Usuario de cuenta" }
-      case 'account_observer': return { color: 'bg-gray-400', tooltip: "Observador de cuenta" }
+      case 'account_observer': return { color: 'bg-yellow-400', tooltip: "Observador de cuenta" }
       default: return { color: 'bg-gray-100', tooltip: "Usuario" }
     }
   }
 
   return (
     <div className="bg-white dark:bg-zinc-900 rounded-2xl shadow-sm p-8 border border-zinc-200 dark:border-zinc-800 transition-colors">
+      {/* Banner of invitation */}
+      {user.memberships?.find(m => m.organization_id === user.organization?.organization_id)?.status === 'pending' && (
+        <div className="bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-900/50 p-3 rounded-xl flex items-center justify-between mb-8 animate-in fade-in slide-in-from-top-2 duration-500">
+          <div className="flex items-center gap-3">
+            <div className="w-2 h-2 bg-red-600 rounded-full animate-ping"></div>
+            <p className="text-[10px] font-black text-red-600 uppercase tracking-widest">Tienes una invitación pendiente para este equipo</p>
+          </div>
+          <button className="text-[9px] font-black bg-red-600 text-white px-3 py-1.5 rounded-lg uppercase hover:bg-red-700 transition-all shadow-lg shadow-red-600/20 active:scale-95">
+            Aceptar Acceso
+          </button>
+        </div>
+      )}
+
       <div className="flex flex-col md:flex-row md:items-center space-y-6 md:space-y-0 md:space-x-8">
         <div className="relative group">
           {user.avatarUrl ? (
@@ -124,7 +115,6 @@ export function UserProfile() {
           )}
           <div className={`absolute -top-1 -right-1 w-5 h-5 rounded-full border-4 border-white dark:border-zinc-900 ${getRoleBadgeColor(user.role).color} z-10`}></div>
 
-          {/* Dashboard Premium Tooltip */}
           <div className="absolute -top-10 right-0 transform scale-75 opacity-0 group-hover:opacity-100 group-hover:scale-100 transition-all duration-200 pointer-events-none z-30">
             <div className="bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg shadow-2xl border border-white/10 whitespace-nowrap">
               {getRoleBadgeColor(user.role).tooltip}
@@ -135,44 +125,44 @@ export function UserProfile() {
 
         <div className="flex-1 space-y-1">
           <div className="flex items-center space-x-3">
-            <h2 className="text-3xl font-black tracking-tight text-zinc-900 dark:text-white uppercase">{user.fullName}</h2>
+            <h2 className="text-3xl mb-[-15px] font-black tracking-tight text-zinc-900 dark:text-white uppercase">{user.fullName}</h2>
             {user.isVerified && (
               <svg className="w-6 h-6 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
               </svg>
             )}
           </div>
-          <p className="text-zinc-500 dark:text-zinc-400 font-medium">@{user.username || user.email.split('@')[0]}</p>
+          {user.username &&
+            <p className="text-zinc-500 dark:text-zinc-400 font-medium">@{user.username}</p>
+          }
           <div className="flex items-center space-x-2 pt-2 text-zinc-400 dark:text-zinc-500 text-sm">
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-            </svg>
             <span>{user.email}</span>
           </div>
         </div>
 
-        <div className="flex flex-col space-y-3 shrink-0">
-          <div className="p-4 bg-zinc-50 dark:bg-zinc-800/50 rounded-xl border border-zinc-100 dark:border-zinc-700/50">
-            <p className="text-[10px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-[0.2em] mb-1">Estado de verificación</p>
-            <p className="font-bold text-zinc-900 dark:text-white">
-              {user.isVerified ? 'Verificado' : 'Pendiente'}
+        <div className="flex flex-row gap-12">
+          <div>
+            <p className="text-[10px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-widest mb-1">Invitación</p>
+            <p className="text-sm font-bold text-zinc-900 dark:text-white truncate">
+              {user.memberships?.find(m => m.organization_id === user.organization?.organization_id)?.status === 'pending' ? 'Pendiente' : 'Aceptada'}
             </p>
           </div>
-        </div>
-      </div>
-
-      <div className="mt-8 pt-8 border-t border-zinc-100 dark:border-zinc-800 gap-8 flex flex-row justify-around">
-        <div>
-          <p className="text-[10px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-widest mb-1">ID de cuenta</p>
-          <p className="text-sm font-bold text-zinc-900 dark:text-white truncate">
-            {user.account?.name || 'Personal workspace'}
-          </p>
-        </div>
-        <div>
-          <p className="text-[10px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-widest mb-1">Permisos de rol</p>
-          <p className="text-sm font-bold text-zinc-900 dark:text-white">
-            Nivel de acceso {user.role === 'sysadmin' ? 'Root' : 'Standard'}
-          </p>
+          <div>
+            <p className="text-[10px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-widest mb-1">Equipo Activo</p>
+            <p className="text-sm font-bold text-zinc-900 dark:text-white truncate">
+              {user.organization?.name || 'Espacio Personal'}
+            </p>
+          </div>
+          <div>
+            <p className="text-[10px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-widest mb-1">Permisos de rol</p>
+            <p className="text-sm font-bold text-zinc-900 dark:text-white">
+              Nivel {
+                user.role === 'sysadmin' ? 'Root (Global)' :
+                  user.role === 'account_admin' ? 'Administrador' :
+                    user.role === 'account_user' ? 'Estándar' : 'Limitado (Vista)'
+              }
+            </p>
+          </div>
         </div>
       </div>
     </div>
