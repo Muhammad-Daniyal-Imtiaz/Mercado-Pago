@@ -29,7 +29,7 @@ export function UserProfile() {
     try {
       const res = await fetch('/api/auth/session')
       const data = await res.json()
-      
+
       if (res.ok && data.user) {
         setUser(data.user)
       }
@@ -51,7 +51,7 @@ export function UserProfile() {
               <div className="w-12 h-3 bg-zinc-300 dark:bg-zinc-600 rounded animate-pulse"></div>
             </div>
           </div>
-          
+
           {/* Skeleton User Info */}
           <div className="flex-1 space-y-3">
             <div className="flex items-center space-x-3">
@@ -99,11 +99,11 @@ export function UserProfile() {
 
   const getRoleBadgeColor = (role: string) => {
     switch (role) {
-      case 'sysadmin': return 'bg-purple-100 text-purple-800'
-      case 'account_admin': return 'bg-blue-100 text-blue-800'
-      case 'account_user': return 'bg-green-100 text-green-800'
-      case 'account_observer': return 'bg-gray-100 text-gray-800'
-      default: return 'bg-gray-100 text-gray-800'
+      case 'sysadmin': return { color: 'bg-purple-100', tooltip: "Administrador del sistema" }
+      case 'account_admin': return { color: 'bg-blue-100', tooltip: "Administrador de cuenta" }
+      case 'account_user': return { color: 'bg-green-300', tooltip: "Usuario de cuenta" }
+      case 'account_observer': return { color: 'bg-gray-100', tooltip: "Observador de cuenta" }
+      default: return { color: 'bg-gray-100', tooltip: "Usuario" }
     }
   }
 
@@ -112,8 +112,8 @@ export function UserProfile() {
       <div className="flex flex-col md:flex-row md:items-center space-y-6 md:space-y-0 md:space-x-8">
         <div className="relative group">
           {user.avatarUrl ? (
-            <img 
-              src={user.avatarUrl} 
+            <img
+              src={user.avatarUrl}
               alt={user.fullName}
               className="w-24 h-24 rounded-2xl object-cover ring-4 ring-zinc-50 dark:ring-zinc-800"
             />
@@ -122,13 +122,17 @@ export function UserProfile() {
               {user.fullName.charAt(0)}
             </div>
           )}
-          <div className="absolute -bottom-8 right-2 px-2 py-1 bg-white dark:bg-zinc-800 rounded-md shadow-md">
-            <span className={`text-[8px] font-black tracking-widest ${getRoleBadgeColor(user.role).split(' ')[1]}`}>
-              {user.role.replace('_', ' ')}
-            </span>
+          <div className={`absolute -top-1 -right-1 w-5 h-5 rounded-full border-4 border-white dark:border-zinc-900 ${getRoleBadgeColor(user.role).color} z-10`}></div>
+
+          {/* Dashboard Premium Tooltip */}
+          <div className="absolute -top-10 right-0 transform scale-75 opacity-0 group-hover:opacity-100 group-hover:scale-100 transition-all duration-200 pointer-events-none z-30">
+            <div className="bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg shadow-2xl border border-white/10 whitespace-nowrap">
+              {getRoleBadgeColor(user.role).tooltip}
+            </div>
+            <div className="w-3 h-3 bg-zinc-900 dark:bg-zinc-100 rotate-45 absolute -bottom-1 right-2"></div>
           </div>
         </div>
-        
+
         <div className="flex-1 space-y-1">
           <div className="flex items-center space-x-3">
             <h2 className="text-3xl font-black tracking-tight text-zinc-900 dark:text-white uppercase">{user.fullName}</h2>
@@ -157,7 +161,7 @@ export function UserProfile() {
         </div>
       </div>
 
-      <div className="mt-8 pt-8 border-t border-zinc-100 dark:border-zinc-800 grid grid-cols-2 md:grid-cols-4 gap-8">
+      <div className="mt-8 pt-8 border-t border-zinc-100 dark:border-zinc-800 gap-8 flex flex-row justify-around">
         <div>
           <p className="text-[10px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-widest mb-1">ID de cuenta</p>
           <p className="text-sm font-bold text-zinc-900 dark:text-white truncate">
@@ -168,12 +172,6 @@ export function UserProfile() {
           <p className="text-[10px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-widest mb-1">Permisos de rol</p>
           <p className="text-sm font-bold text-zinc-900 dark:text-white">
             Nivel de acceso {user.role === 'sysadmin' ? 'Root' : 'Standard'}
-          </p>
-        </div>
-        <div>
-          <p className="text-[10px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-widest mb-1">Último inicio de sesión</p>
-          <p className="text-sm font-bold text-zinc-900 dark:text-white">
-            {user.lastLogin ? new Date(user.lastLogin).toLocaleDateString() : 'Primera sesión'}
           </p>
         </div>
       </div>
