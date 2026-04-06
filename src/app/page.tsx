@@ -2,10 +2,10 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import { 
-  Shield, 
-  Bell, 
-  Users, 
+import {
+  Shield,
+  Bell,
+  Users,
   CheckCircle2,
   Zap,
   ArrowRight,
@@ -130,18 +130,17 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-gray-900 text-white">
-      
+
       {/* Navigation */}
-      <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled ? 'bg-black/80 backdrop-blur-xl border-b border-white/10' : 'bg-transparent'
-      }`}>
+      <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? 'bg-black/80 backdrop-blur-xl border-b border-white/10' : 'bg-transparent'
+        }`}>
         <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
           <div className="flex items-center gap-3">
             <div className="w-15 h-15 bg-gradient-to-r from-slate-100 to-white rounded-xl flex items-center justify-center">
-              <Image 
-                src="/assets/logo.png" 
-                alt="Pay-Alert" 
-                width={60} 
+              <Image
+                src="/assets/logo.png"
+                alt="Pay-Alert"
+                width={60}
                 height={60}
                 className="rounded-lg"
               />
@@ -153,20 +152,20 @@ export default function Home() {
               <span className="text-gray-400 text-sm ml-1">.com.ar</span>
             </div>
           </div>
-          
+
           <div className="hidden md:flex items-center gap-8">
             <a href="#features" className="text-gray-300 hover:text-white transition-colors">Características</a>
             <a href="#plans" className="text-gray-300 hover:text-white transition-colors">Planes</a>
             <a href="#how" className="text-gray-300 hover:text-white transition-colors">Cómo Funciona</a>
-            <a 
-              href="/login" 
+            <a
+              href="/login"
               className="flex items-center gap-2 px-5 py-2 bg-blue-500 hover:bg-blue-600 rounded-full text-white font-medium transition-all"
             >
               Iniciar Sesión
             </a>
-            <a 
-              href="https://wa.me/543876295801" 
-              target="_blank" 
+            <a
+              href="https://wa.me/543876295801?text=Hola,%20quiero%20más%20información%20sobre%20Pay-Alert%20y%20sus%20servicios"
+              target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-2 px-5 py-2 bg-green-500 hover:bg-green-600 rounded-full text-white font-medium transition-all"
             >
@@ -205,23 +204,23 @@ export default function Home() {
 
           {/* Subtitle */}
           <p className="text-xl md:text-2xl text-gray-300 max-w-3xl mx-auto mb-8 leading-relaxed">
-            Recibe notificaciones <span className="text-blue-400 font-semibold">verificadas y en tiempo real&nbsp;</span> 
-             de cada pago que ingresa a tu cuenta de Mercado Pago. 
+            Recibe notificaciones <span className="text-blue-400 font-semibold">verificadas y en tiempo real&nbsp;</span>
+            de cada pago que ingresa a tu cuenta de Mercado Pago.
             Ideal para dueños de negocios y sus equipos.
           </p>
 
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-            <a 
-              href="/login" 
+            <a
+              href="/login"
               className="group px-8 py-4 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full text-white font-semibold text-lg hover:shadow-lg hover:shadow-blue-500/25 transition-all duration-300 transform hover:scale-105 flex items-center gap-3 justify-center"
             >
               Iniciar Sesión
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </a>
-            <a 
-              href="https://wa.me/543876295801" 
-              target="_blank" 
+            <a
+              href="https://wa.me/543876295801?text=Hola,%20quiero%20más%20información%20sobre%20Pay-Alert%20y%20sus%20servicios"
+              target="_blank"
               rel="noopener noreferrer"
               className="group px-8 py-4 bg-gradient-to-r from-green-500 to-green-600 rounded-full text-white font-semibold text-lg hover:shadow-lg hover:shadow-green-500/25 transition-all duration-300 transform hover:scale-105 flex items-center gap-3 justify-center"
             >
@@ -229,8 +228,8 @@ export default function Home() {
               Hablar por WhatsApp
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </a>
-            <a 
-              href="#features" 
+            <a
+              href="#features"
               className="px-8 py-4 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full text-white font-semibold text-lg hover:bg-white/20 transition-all duration-300 flex items-center gap-3 justify-center"
             >
               <Star className="w-5 h-5" />
@@ -326,7 +325,7 @@ export default function Home() {
                 icon: HousePlug
               },
               {
-                step: "02", 
+                step: "02",
                 title: "Invita a tu equipo",
                 description: "Asigna observadores para que reciban las notificaciones",
                 icon: Users
@@ -381,11 +380,10 @@ export default function Home() {
             {plans.map((plan, idx) => (
               <div
                 key={idx}
-                className={`relative bg-white/5 backdrop-blur-sm rounded-2xl border ${
-                  plan.popular 
-                    ? 'border-blue-500 shadow-2xl shadow-blue-500/20 scale-105' 
-                    : 'border-white/10'
-                } hover:border-white/20 transition-all`}
+                className={`relative bg-white/5 backdrop-blur-sm rounded-2xl border ${plan.popular
+                  ? 'border-blue-500 shadow-2xl shadow-blue-500/20 scale-105'
+                  : 'border-white/10'
+                  } hover:border-white/20 transition-all`}
               >
                 {plan.popular && (
                   <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
@@ -394,7 +392,7 @@ export default function Home() {
                     </div>
                   </div>
                 )}
-                
+
                 <div className="p-8">
                   <div className="text-center mb-8">
                     <h3 className="text-2xl font-bold text-white mb-2">{plan.name}</h3>
@@ -414,15 +412,14 @@ export default function Home() {
                     ))}
                   </ul>
 
-                  <a 
-                    href="https://wa.me/543876295801" 
-                    target="_blank" 
+                  <a
+                    href="https://wa.me/543876295801?text=Hola,%20quiero%20más%20información%20sobre%20Pay-Alert%20y%20sus%20servicios"
+                    target="_blank"
                     rel="noopener noreferrer"
-                    className={`w-full block text-center px-6 py-3 rounded-full font-semibold transition-all ${
-                      plan.popular
-                        ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:shadow-lg hover:shadow-blue-500/25'
-                        : 'bg-white/10 text-white border border-white/20 hover:bg-white/20'
-                    }`}
+                    className={`w-full block text-center px-6 py-3 rounded-full font-semibold transition-all ${plan.popular
+                      ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:shadow-lg hover:shadow-blue-500/25'
+                      : 'bg-white/10 text-white border border-white/20 hover:bg-white/20'
+                      }`}
                   >
                     {plan.name === "Enterprise" ? "Contactar Ventas" : "Comenzar Ahora"}
                   </a>
@@ -443,9 +440,9 @@ export default function Home() {
             <p className="text-gray-300 mb-8 text-lg">
               Habla hoy mismo con nuestro equipo y recibe información al instante
             </p>
-            <a 
-              href="https://wa.me/543876295801" 
-              target="_blank" 
+            <a
+              href="https://wa.me/543876295801?text=Hola,%20quiero%20más%20información%20sobre%20Pay-Alert%20y%20sus%20servicios"
+              target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-green-500 to-green-600 rounded-full text-white font-semibold text-lg hover:shadow-lg hover:shadow-green-500/25 transition-all duration-300 transform hover:scale-105"
             >
@@ -479,7 +476,7 @@ export default function Home() {
               <span>•</span>
               <span>Integrado con Mercado Pago</span>
               <span>•</span>
-              <a href="https://wa.me/543876295801" className="hover:text-white transition-colors">
+              <a href="https://wa.me/543876295801?text=Hola,%20quiero%20más%20información%20sobre%20Pay-Alert%20y%20sus%20servicios" className="hover:text-white transition-colors">
                 Soporte 24/7
               </a>
             </div>

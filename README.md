@@ -216,7 +216,7 @@ const data = await analytics.json();
 ## 🌍 Support
 
 - 📧 **Email**: .... (?)
-- 💬 **WhatsApp**: [+54 9 387 629-5801](https://wa.me/543876295801)
+- 💬 **WhatsApp**: [+54 9 387 629-5801](https://wa.me/543876295801?text=Hola%20quiero%20mas%20informacion%20sobre%20Pay-Alert)
 - 📚 **Documentation**: [docs.payalert.com](https://docs.payalert.com)
 - 🐛 **Bug Reports**: [GitHub Issues](https://github.com/yourusername/pay-alert/issues)
 
