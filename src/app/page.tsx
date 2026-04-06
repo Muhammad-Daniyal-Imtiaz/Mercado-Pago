@@ -10,7 +10,6 @@ import {
   Zap,
   ArrowRight,
   MessageCircle,
-  CreditCard,
   HousePlug,
   Eye,
   Smartphone,
