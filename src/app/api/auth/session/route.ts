@@ -24,6 +24,7 @@ export async function GET() {
         email: authUser.email,
         fullName: authUser.user_metadata?.full_name || authUser.email,
         role: authUser.user_metadata?.role || 'account_user',
+        isVerified: authUser.user_metadata?.is_verified || false,
         organization: null,
         memberships: []
       }
@@ -55,6 +56,7 @@ export async function GET() {
       email: profile.email,
       fullName: profile.full_name,
       avatarUrl: profile.avatar_url,
+      isVerified: profile.is_verified,
       role: activeOrg?.role || profile.role,
       organization: activeOrg,
       memberships: memberships

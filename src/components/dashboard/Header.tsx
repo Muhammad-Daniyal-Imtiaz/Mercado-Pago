@@ -25,7 +25,7 @@ export function Header() {
 
   const handleSwitchOrg = async (orgId: string) => {
     if (orgId === user.organization?.organization_id) return
-    
+
     setSwitching(true)
     setShowOrgDropdown(false)
     try {
@@ -58,13 +58,13 @@ export function Header() {
               <span className="text-gray-400 text-sm ml-1">.com.ar</span>
             </div>
           </Link>
-          
+
           {user && user.organization && (
             <div className="flex items-center relative gap-4">
               <div className="h-6 w-px bg-zinc-200 dark:bg-zinc-800 mx-1 hidden md:block" />
-              
+
               <div className="relative">
-                <button 
+                <button
                   onClick={() => user.memberships?.length > 1 && setShowOrgDropdown(!showOrgDropdown)}
                   className={`flex flex-col text-left group transition-all ${user.memberships?.length > 1 ? 'cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-800 p-2 rounded-xl' : 'pointer-events-none'}`}
                 >
@@ -75,8 +75,8 @@ export function Header() {
                     )}
                   </div>
                   <span className="text-sm font-black text-zinc-900 dark:text-white uppercase tracking-tighter italic flex items-center gap-1.5">
-                    {user.organization.name} 
-                    <span className="text-zinc-600 dark:text-zinc-400 no-italic opacity-40 font-light">/</span> 
+                    {user.organization.name}
+                    <span className="text-zinc-600 dark:text-zinc-400 no-italic opacity-40 font-light">/</span>
                     {user.role.replace('_', ' ')}
                     {user.memberships?.length > 1 && (
                       <svg className={`w-3 h-3 transition-transform ${showOrgDropdown ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -96,11 +96,10 @@ export function Header() {
                           key={m.organization_id}
                           onClick={() => handleSwitchOrg(m.organization_id)}
                           disabled={switching}
-                          className={`w-full text-left p-3 rounded-xl transition-all flex items-center justify-between group ${
-                            m.organization_id === user.organization?.organization_id 
-                              ? 'bg-zinc-100 dark:bg-zinc-800 cursor-default' 
+                          className={`w-full text-left p-3 rounded-xl transition-all flex items-center justify-between group ${m.organization_id === user.organization?.organization_id
+                              ? 'bg-zinc-100 dark:bg-zinc-800 cursor-default'
                               : 'hover:bg-zinc-50 dark:hover:bg-zinc-800/50'
-                          }`}
+                            }`}
                         >
                           <div className="flex flex-col">
                             <span className="font-black text-xs uppercase tracking-tight text-zinc-900 dark:text-white">{m.name}</span>
@@ -145,7 +144,7 @@ export function Header() {
                 onClick={handleSignOut}
                 className="text-xs font-black uppercase tracking-widest text-red-600 hover:text-red-700 transition-colors"
               >
-                Sign out
+                Cerrar sesión
               </button>
             </>
           ) : (
@@ -164,7 +163,7 @@ export function Header() {
           )}
         </div>
       </div>
-      
+
       {switching && (
         <div className="absolute inset-0 bg-white/40 dark:bg-black/40 backdrop-blur-[2px] z-[70] flex items-center justify-center">
           <div className="animate-spin rounded-full h-8 w-8 border-2 border-zinc-900 dark:border-white border-t-transparent"></div>

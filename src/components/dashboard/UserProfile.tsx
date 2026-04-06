@@ -99,10 +99,10 @@ export function UserProfile() {
 
   const getRoleBadgeColor = (role: string) => {
     switch (role) {
-      case 'sysadmin': return { color: 'bg-purple-100', tooltip: "Administrador del sistema" }
-      case 'account_admin': return { color: 'bg-blue-100', tooltip: "Administrador de cuenta" }
+      case 'sysadmin': return { color: 'bg-purple-300', tooltip: "Administrador del sistema" }
+      case 'account_admin': return { color: 'bg-blue-400', tooltip: "Administrador de cuenta" }
       case 'account_user': return { color: 'bg-green-300', tooltip: "Usuario de cuenta" }
-      case 'account_observer': return { color: 'bg-gray-100', tooltip: "Observador de cuenta" }
+      case 'account_observer': return { color: 'bg-gray-400', tooltip: "Observador de cuenta" }
       default: return { color: 'bg-gray-100', tooltip: "Usuario" }
     }
   }
@@ -153,9 +153,9 @@ export function UserProfile() {
 
         <div className="flex flex-col space-y-3 shrink-0">
           <div className="p-4 bg-zinc-50 dark:bg-zinc-800/50 rounded-xl border border-zinc-100 dark:border-zinc-700/50">
-            <p className="text-[10px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-[0.2em] mb-1">Status</p>
+            <p className="text-[10px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-[0.2em] mb-1">Estado de verificación</p>
             <p className="font-bold text-zinc-900 dark:text-white">
-              {user.isVerified ? 'Verificado' : 'Pendiente de verificación'}
+              {user.isVerified ? 'Verificado' : 'Pendiente'}
             </p>
           </div>
         </div>
