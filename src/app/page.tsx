@@ -463,7 +463,7 @@ export default function Home() {
             <div className="flex items-center gap-3 mb-4 md:mb-0">
               <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center">
                 {/* logo favicon */}
-                <img src="/favicon.ico" alt="Pay Alert" className="w-10 h-10" />
+                <Image src="/favicon.ico" alt="Pay Alert" width={40} height={40} className="w-10 h-10" />
               </div>
               <div>
                 <span className="text-white font-semibold">Pay Alert</span>

@@ -2,7 +2,8 @@ import { createClient } from '@/utils/supabase/server'
 import { NextResponse } from 'next/server'
 
 export async function POST(request: Request) {
-  const { email, password, full_name, role = 'account_admin' } = await request.json()
+  const { email, password, full_name } = await request.json()
+  const role = 'account_admin'; // Default role for new signups
   const supabase = await createClient()
 
   // For security, usually we'd restrict who can sign up as sysadmin,
