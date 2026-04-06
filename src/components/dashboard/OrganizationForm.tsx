@@ -22,9 +22,9 @@ export function OrganizationForm({ onSuccess }: { onSuccess?: () => void }) {
       })
 
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'Failed to create organization')
+      if (!res.ok) throw new Error(data.error || 'Error al crear la organización')
 
-      setMessage('Organization created successfully!')
+      setMessage('¡Organización creada con éxito!')
       setName('')
       if (onSuccess) onSuccess()
     } catch (err: any) {
@@ -36,30 +36,30 @@ export function OrganizationForm({ onSuccess }: { onSuccess?: () => void }) {
 
   return (
     <div className="max-w-md mx-auto p-6 bg-white dark:bg-zinc-900 rounded-xl shadow-lg border border-zinc-200 dark:border-zinc-800">
-      <h2 className="text-2xl font-bold mb-6 text-zinc-900 dark:text-white">Create New Organization</h2>
+      <h2 className="text-2xl font-bold mb-6 text-zinc-900 dark:text-white uppercase tracking-tight">Crear nuevo equipo</h2>
       <form onSubmit={handleCreate} className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
-            Organization Name
+          <label className="block text-[10px] font-black uppercase tracking-widest text-zinc-500 dark:text-zinc-400 mb-2">
+            Nombre del equipo
           </label>
           <input
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
             required
-            className="w-full px-4 py-2 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-transparent focus:ring-2 focus:ring-blue-500 outline-none"
-            placeholder="AlertFlow Business"
+            className="w-full px-4 py-3 rounded-xl border-2 border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950 focus:border-zinc-900 dark:focus:border-white outline-none transition-all font-bold"
+            placeholder="Ej: Mi Negocio"
           />
         </div>
         <button
           type="submit"
           disabled={loading}
-          className="w-full py-3 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 font-semibold rounded-lg transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50"
+          className="w-full py-4 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 font-black rounded-xl transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 uppercase tracking-widest text-xs"
         >
-          {loading ? 'Creating...' : 'Create Organization'}
+          {loading ? 'Creando...' : 'Crear Equipo'}
         </button>
-        {message && <p className="text-green-600 font-bold text-center">{message}</p>}
-        {error && <p className="text-red-500 font-medium text-center bg-red-50 dark:bg-red-900/10 p-2 rounded">{error}</p>}
+        {message && <p className="text-green-500 font-bold text-center text-sm">{message}</p>}
+        {error && <p className="text-red-500 font-bold text-center bg-red-50 dark:bg-red-900/10 p-2 rounded text-sm">{error}</p>}
       </form>
     </div>
   )
