@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Image from 'next/image'
 import { Header } from '@/components/dashboard/Header'
 import { Sidebar } from '@/components/dashboard/Sidebar'
 
@@ -131,7 +132,7 @@ export default function DashboardLayout({
                 <div className="p-4 border-b border-zinc-100 dark:border-zinc-900 bg-zinc-50/50 dark:bg-zinc-900/30">
                   <div className="flex items-center gap-3 mb-4 px-2">
                     {user.avatarUrl ? (
-                      <img src={user.avatarUrl} className="w-10 h-10 rounded-full" />
+                      <Image src={user.avatarUrl} alt={user.fullName} width={40} height={40} className="rounded-full" />
                     ) : (
                       <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold">
                         {user.fullName.charAt(0)}

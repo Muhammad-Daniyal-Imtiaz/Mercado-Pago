@@ -7,13 +7,8 @@ export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url)
   const code = searchParams.get('code')
   
-  // Try to get role from cookie, fallback to param
-  const cookieStore = await cookies()
-  const roleFromCookie = cookieStore.get('auth_role')?.value
-  const role = roleFromCookie || searchParams.get('role') || 'account_user'
-  
-  // Consumir la cookie
-  if (roleFromCookie) cookieStore.delete('auth_role')
+  // Roles should come from the invitations table or be a safe default for NEW users.
+  const role = 'account_user';
 
   // More reliable production detection
   const isProduction = process.env.NODE_ENV === 'production' ||

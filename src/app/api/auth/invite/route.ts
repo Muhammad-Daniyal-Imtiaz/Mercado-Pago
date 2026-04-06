@@ -36,9 +36,11 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 })
   }
 
-  // Check if they are part of an organization (sysadmins can bypass)
-  if (!userData.organization_id && userData.role !== 'sysadmin') {
-     return NextResponse.json({ error: 'No organization linked to this admin' }, { status: 400 })
+  // IDOR PROTECTION: Check if they are part of the TARGET organization (sysadmins can bypass)
+  if (userData.role !== 'sysadmin') {
+    if (!userData.organization_id || userData.organization_id !== organization_id) {
+       return NextResponse.json({ error: 'You can only invite members to your current active organization.' }, { status: 403 })
+    }
   }
 
 

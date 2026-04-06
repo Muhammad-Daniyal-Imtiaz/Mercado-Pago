@@ -3,8 +3,8 @@ import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 
 export async function GET(request: Request) {
-  const { origin, searchParams } = new URL(request.url)
-  const role = searchParams.get('role') || 'account_user';
+  const { origin } = new URL(request.url)
+  const role = 'account_user'; // Default for new OAuth accounts
 
   // More reliable production detection
   const isProduction = process.env.NODE_ENV === 'production' ||

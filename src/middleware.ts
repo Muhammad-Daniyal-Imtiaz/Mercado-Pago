@@ -1,34 +1,8 @@
-import { type NextRequest, NextResponse } from 'next/server'
+import { type NextRequest } from 'next/server'
+import { updateSession } from '@/utils/supabase/middleware'
 
 export async function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl
-
-  // Rutas permitidas (públicas)
-  const allowedPaths = [
-    '/',
-    '/features',
-    '/plans', 
-    '/how',
-    '/favicon.ico',
-    '/login',
-    '/signup',
-    '/forgot-password',
-    '/reset-password',
-    '/verify-email',
-    '/invite',
-    '/dashboard'
-  ]
-
-  // Si la ruta no está en las permitidas y no es un archivo estático, redirigir a home
-  if (!allowedPaths.includes(pathname) && 
-      !pathname.startsWith('/_next') && 
-      !pathname.startsWith('/api') &&
-      !pathname.startsWith('/dashboard') &&
-      !pathname.includes('.')) {
-    return NextResponse.redirect(new URL('/', request.url))
-  }
-
-  return NextResponse.next()
+  return await updateSession(request)
 }
 
 export const config = {
