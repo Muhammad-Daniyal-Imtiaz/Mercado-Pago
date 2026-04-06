@@ -1,5 +1,6 @@
 import { createClient } from '@/utils/supabase/server'
 import { NextResponse } from 'next/server'
+import { cookies } from 'next/headers'
 
 export async function GET(request: Request) {
   const { origin, searchParams } = new URL(request.url)
@@ -16,11 +17,13 @@ export async function GET(request: Request) {
   const baseUrl = isLocal ? origin : (process.env.NEXT_PUBLIC_SITE_URL || origin)
 
   const supabase = await createClient()
+  const cookieStore = await cookies()
+  cookieStore.set('auth_role', role, { maxAge: 60 * 5, path: '/' }) // 5 min max
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
     options: {
-      redirectTo: `${baseUrl}/api/auth/callback?role=${role}`,
+      redirectTo: `${baseUrl}/api/auth/callback`,
       queryParams: {
         prompt: 'select_account',
         access_type: 'offline',

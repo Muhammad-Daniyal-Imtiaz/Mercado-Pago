@@ -74,32 +74,32 @@ export default function InviteForm() {
   }
 
   return (
-    <div className="max-w-md mx-auto p-8 bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl border border-zinc-200 dark:border-zinc-800 transition-all">
-      <h2 className="text-3xl font-black mb-8 text-zinc-900 dark:text-white tracking-tighter uppercase">Invite New User</h2>
+    <div className="w-full p-5 sm:p-8 bg-white dark:bg-zinc-900 rounded-2xl shadow-sm border border-zinc-200 dark:border-zinc-800 transition-all">
+      <h2 className="text-2xl sm:text-3xl font-black mb-6 text-zinc-900 dark:text-white tracking-tighter uppercase">Invitar usuario</h2>
       <form onSubmit={handleInvite} className="space-y-6">
         <div>
           <label className="block text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-2">
-            Target Email
+            Email de destino
           </label>
           <input
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="w-full px-4 py-3 rounded-xl border-2 border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950 focus:border-zinc-900 dark:focus:border-white outline-none transition-all font-bold"
+            className="w-full px-4 py-3 rounded-xl border-2 border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950 focus:border-zinc-900 dark:focus:border-white outline-none transition-all font-bold placeholder:text-zinc-300 dark:placeholder:text-zinc-700"
             placeholder="colleague@business.com"
           />
         </div>
         
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-2">
-              Role
+              Rol
             </label>
             <select
               value={role}
               onChange={(e) => setRole(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl border-2 border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950 outline-none transition-all font-bold"
+              className="w-full px-4 py-3 rounded-xl border-2 border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950 outline-none transition-all font-bold appearance-none cursor-pointer"
             >
               <option value="account_user">User</option>
               <option value="account_observer">Observer</option>
@@ -107,12 +107,12 @@ export default function InviteForm() {
           </div>
           <div>
             <label className="block text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-2">
-              Organization
+              Organización
             </label>
             <select
               value={selectedOrg}
               onChange={(e) => setSelectedOrg(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl border-2 border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950 outline-none transition-all font-bold"
+              className="w-full px-4 py-3 rounded-xl border-2 border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950 outline-none transition-all font-bold appearance-none cursor-pointer"
             >
               {organizations.map(org => (
                 <option key={org.id} value={org.id}>{org.name}</option>
