@@ -32,18 +32,26 @@ export async function GET() {
   }
 
   // Resolve all organizations the user is a member of
-  const userRoles = profile.roles || []
+  let userRoles = []
+  try {
+    userRoles = typeof profile.roles === 'string' ? JSON.parse(profile.roles) : (profile.roles || [])
+  } catch (err) {
+    console.error('Error al parsear roles:', err)
+    userRoles = []
+  }
+
   const { data: userOrgs } = await adminClient
     .from('organizations')
     .select('id, name')
     .in('id', userRoles.map((r: { organization_id: string }) => r.organization_id))
 
-  const memberships = userRoles.map((r: { organization_id: string; role: string }) => {
+  const memberships = userRoles.map((r: { organization_id: string; role: string; status?: string }) => {
     const org = userOrgs?.find((o: { id: string }) => o.id === r.organization_id)
     return {
       organization_id: r.organization_id,
       name: org?.name || 'Unknown Portal',
-      role: r.role
+      role: r.role,
+      status: r.status || 'active'
     }
   })
 

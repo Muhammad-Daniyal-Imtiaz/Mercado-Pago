@@ -59,6 +59,16 @@ export function Header() {
             </div>
           </Link>
 
+          {!user && (
+            <div className="flex items-center gap-4">
+              <div className="h-6 w-px bg-zinc-100 dark:bg-zinc-800 mx-1 hidden md:block" />
+              <div className="space-y-1.5 container">
+                <div className="w-20 h-2 bg-zinc-100 dark:bg-zinc-800 rounded animate-pulse"></div>
+                <div className="w-32 h-4 bg-zinc-100 dark:bg-zinc-800 rounded animate-pulse"></div>
+              </div>
+            </div>
+          )}
+
           {user && user.organization && (
             <div className="flex items-center relative gap-4">
               <div className="h-6 w-px bg-zinc-200 dark:bg-zinc-800 mx-1 hidden md:block" />
@@ -69,9 +79,11 @@ export function Header() {
                   className={`flex flex-col text-left group transition-all ${user.memberships?.length > 1 ? 'cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-800 p-2 rounded-xl' : 'pointer-events-none'}`}
                 >
                   <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400 opacity-60">Current Portal</span>
+                    <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400 opacity-60">Portal Actual</span>
                     {user.memberships?.length > 1 && (
-                      <span className="text-[8px] bg-red-600 text-white px-1.5 py-0.5 rounded font-black animate-pulse uppercase">Invite Pending</span>
+                      <span className="text-[8px] bg-blue-600 text-white px-1.5 py-0.5 rounded font-black uppercase tracking-tighter">
+                        {user.memberships.length} Equipos
+                      </span>
                     )}
                   </div>
                   <span className="text-sm font-black text-zinc-900 dark:text-white uppercase tracking-tighter italic flex items-center gap-1.5">
@@ -89,7 +101,7 @@ export function Header() {
                 {/* Organization Switcher Dropdown */}
                 {showOrgDropdown && user.memberships && (
                   <div className="absolute top-full left-0 mt-2 w-72 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-2xl p-2 z-[60] animate-in slide-in-from-top-2">
-                    <p className="px-3 pt-2 pb-4 text-[10px] font-black uppercase tracking-widest text-zinc-400 border-b border-zinc-100 dark:border-zinc-800 mb-2">Switch Organization</p>
+                    <p className="px-3 pt-2 pb-4 text-[10px] font-black uppercase tracking-widest text-zinc-400 border-b border-zinc-100 dark:border-zinc-800 mb-2">Cambiar de equipo</p>
                     <div className="space-y-1">
                       {user.memberships.map((m: any) => (
                         <button
@@ -152,13 +164,13 @@ export function Header() {
             <>
               <div className="flex items-center space-x-4">
                 <div className="text-right hidden sm:block">
-                  <div className="w-24 h-4 bg-zinc-200 dark:bg-zinc-700 rounded animate-pulse mb-1"></div>
-                  <div className="w-16 h-3 bg-zinc-200 dark:bg-zinc-700 rounded animate-pulse"></div>
+                  <div className="w-24 h-4 bg-zinc-100 dark:bg-zinc-800 rounded animate-pulse mb-1"></div>
+                  <div className="w-16 h-3 bg-zinc-100 dark:bg-zinc-800 rounded animate-pulse"></div>
                 </div>
-                <div className="w-10 h-10 bg-zinc-200 dark:bg-zinc-700 rounded-full animate-pulse"></div>
+                <div className="w-10 h-10 bg-zinc-100 dark:bg-zinc-800 rounded-full animate-pulse"></div>
               </div>
-              <div className="h-6 w-px bg-zinc-200 dark:bg-zinc-800" />
-              <div className="w-16 h-4 bg-zinc-200 dark:bg-zinc-700 rounded animate-pulse"></div>
+              <div className="h-6 w-px bg-zinc-100 dark:bg-zinc-800" />
+              <div className="w-16 h-4 bg-zinc-100 dark:bg-zinc-800 rounded animate-pulse"></div>
             </>
           )}
         </div>

@@ -4,24 +4,17 @@ import { NextResponse } from 'next/server'
 export async function GET(request: Request) {
   const { origin, searchParams } = new URL(request.url)
   const role = searchParams.get('role') || 'account_user';
-  
+
   // More reliable production detection
-  const isProduction = process.env.NODE_ENV === 'production' || 
-                       process.env.VERCEL_ENV === 'production' ||
-                       !origin.includes('localhost')
-  
-  // Force production URL regardless of origin
-  const baseUrl = isProduction 
-    ? 'https://pay-alert-tan.vercel.app'
-    : origin
-  
-  // Debug logging
-  console.log('Auth Google - Origin:', origin)
-  console.log('Auth Google - Is Production:', isProduction)
-  console.log('Auth Google - Base URL:', baseUrl)
-  console.log('Auth Google - NODE_ENV:', process.env.NODE_ENV)
-  console.log('Auth Google - VERCEL_ENV:', process.env.VERCEL_ENV)
-  
+  const isProduction = process.env.NODE_ENV === 'production' ||
+    process.env.VERCEL_ENV === 'production' ||
+    !origin.includes('localhost')
+
+  // If we are on localhost, use the actual request origin.
+  // In production, use the configured SITE_URL (pay-alert.com.ar).
+  const isLocal = origin.includes('localhost')
+  const baseUrl = isLocal ? origin : (process.env.NEXT_PUBLIC_SITE_URL || origin)
+
   const supabase = await createClient()
 
   const { data, error } = await supabase.auth.signInWithOAuth({
@@ -34,9 +27,6 @@ export async function GET(request: Request) {
       },
     },
   })
-
-
-
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 400 })
