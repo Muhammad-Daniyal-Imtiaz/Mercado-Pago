@@ -44,10 +44,10 @@ export default function DashboardLayout({
     }
 
     const activeColorMap: Record<string, string> = {
-      sysadmin: 'bg-zinc-900 dark:bg-zinc-100',
-      account_admin: 'bg-blue-600',
-      account_user: 'bg-green-600',
-      account_observer: 'bg-green-600',
+      sysadmin: 'bg-zinc-900',
+      account_admin: 'bg-blue-500',
+      account_user: 'bg-green-500',
+      account_observer: 'bg-blue-500',
     }
 
     const labels: Record<string, string> = {
@@ -58,9 +58,9 @@ export default function DashboardLayout({
     }
 
     return (
-      <Sidebar 
-        items={MENU_ITEMS[role]} 
-        activeColor={activeColorMap[role]} 
+      <Sidebar
+        items={MENU_ITEMS[role]}
+        activeColor={activeColorMap[role]}
         label={labels[role]}
       />
     )
@@ -80,4 +80,4 @@ export default function DashboardLayout({
     </div>
   )
 }
-
+
