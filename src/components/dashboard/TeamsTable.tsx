@@ -1,7 +1,8 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { Users, Settings, Trash2, Eye, ChevronDown, ChevronRight, UserX, Send, Shield, User, UserCog, RotateCcw, Mail, Phone } from 'lucide-react'
+import { Dialog, type DialogAction } from '@/components/alerts/Dialog'
 
 interface Member {
   id: string
@@ -36,6 +37,48 @@ export function TeamsTable({ onRefresh }: { onRefresh?: () => void }) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [actionLoading, setActionLoading] = useState<string | null>(null)
+  
+  // Dialog state
+  const [dialog, setDialog] = useState<{
+    isOpen: boolean
+    title: string
+    message: string
+    type: 'info' | 'success' | 'warning' | 'error' | 'confirm'
+    actions: DialogAction[]
+  }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    type: 'info',
+    actions: [],
+  })
+
+  const closeDialog = useCallback(() => {
+    setDialog(prev => ({ ...prev, isOpen: false }))
+  }, [])
+
+  const showDialog = useCallback((title: string, message: string, type: 'info' | 'success' | 'warning' | 'error' = 'info') => {
+    setDialog({
+      isOpen: true,
+      title,
+      message,
+      type,
+      actions: [{ label: 'Aceptar', variant: 'primary', onClick: () => closeDialog() }],
+    })
+  }, [closeDialog])
+
+  const showConfirm = useCallback((title: string, message: string, onConfirm: () => void, confirmLabel = 'Confirmar') => {
+    setDialog({
+      isOpen: true,
+      title,
+      message,
+      type: 'confirm',
+      actions: [
+        { label: 'Cancelar', variant: 'ghost', onClick: closeDialog },
+        { label: confirmLabel, variant: 'danger', onClick: () => { closeDialog(); onConfirm() } },
+      ],
+    })
+  }, [closeDialog])
 
   useEffect(() => {
     fetchTeams()
@@ -65,54 +108,64 @@ export function TeamsTable({ onRefresh }: { onRefresh?: () => void }) {
   }
 
   const handleDeleteTeam = async (teamId: string) => {
-    if (!confirm('¿Estás seguro de que deseas eliminar este equipo?')) return
+    showConfirm(
+      'Eliminar Equipo',
+      '¿Estás seguro de que deseas eliminar este equipo?',
+      async () => {
+        try {
+          const res = await fetch(`/api/organizations/delete`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ organization_id: teamId })
+          })
 
-    try {
-      const res = await fetch(`/api/organizations/delete`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ organization_id: teamId })
-      })
-
-      if (res.ok) {
-        setTeams(teams.filter(t => t.id !== teamId))
-        if (onRefresh) onRefresh()
-      } else {
-        const data = await res.json()
-        alert(data.error || 'Error al eliminar el equipo')
-      }
-    } catch (err) {
-      alert('Error de conexión al eliminar')
-    }
+          if (res.ok) {
+            setTeams(teams.filter(t => t.id !== teamId))
+            if (onRefresh) onRefresh()
+          } else {
+            const data = await res.json()
+            showDialog('Error', data.error || 'Error al eliminar el equipo', 'error')
+          }
+        } catch (err) {
+          showDialog('Error', 'Error de conexión al eliminar', 'error')
+        }
+      },
+      'Eliminar'
+    )
   }
 
   const handleRemoveMember = async (teamId: string, memberId: string) => {
-    if (!confirm('¿Estás seguro de que deseas desasociar este miembro del equipo?')) return
+    showConfirm(
+      'Desasociar Miembro',
+      '¿Estás seguro de que deseas desasociar este miembro del equipo?',
+      async () => {
+        setActionLoading(`remove-${teamId}-${memberId}`)
+        try {
+          const res = await fetch('/api/organizations/members/remove', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ organization_id: teamId, member_id: memberId })
+          })
 
-    setActionLoading(`remove-${teamId}-${memberId}`)
-    try {
-      const res = await fetch('/api/organizations/members/remove', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ organization_id: teamId, member_id: memberId })
-      })
-
-      if (res.ok) {
-        setTeams(teams.map(t => {
-          if (t.id === teamId) {
-            return { ...t, members: t.members?.filter(m => m.id !== memberId) }
+          if (res.ok) {
+            setTeams(teams.map(t => {
+              if (t.id === teamId) {
+                return { ...t, members: t.members?.filter(m => m.id !== memberId) }
+              }
+              return t
+            }))
+          } else {
+            const data = await res.json()
+            showDialog('Error', data.error || 'Error al remover miembro', 'error')
           }
-          return t
-        }))
-      } else {
-        const data = await res.json()
-        alert(data.error || 'Error al remover miembro')
-      }
-    } catch (err) {
-      alert('Error de conexión')
-    } finally {
-      setActionLoading(null)
-    }
+        } catch (err) {
+          showDialog('Error', 'Error de conexión', 'error')
+        } finally {
+          setActionLoading(null)
+        }
+      },
+      'Desasociar'
+    )
   }
 
   const handleUpdateRole = async (teamId: string, memberId: string, newRole: string) => {
@@ -136,10 +189,10 @@ export function TeamsTable({ onRefresh }: { onRefresh?: () => void }) {
         }))
       } else {
         const data = await res.json()
-        alert(data.error || 'Error al actualizar rol')
+        showDialog('Error', data.error || 'Error al actualizar rol', 'error')
       }
     } catch (err) {
-      alert('Error de conexión')
+      showDialog('Error', 'Error de conexión', 'error')
     } finally {
       setActionLoading(null)
     }
@@ -155,50 +208,55 @@ export function TeamsTable({ onRefresh }: { onRefresh?: () => void }) {
       })
 
       if (res.ok) {
-        alert('Invitación reenviada exitosamente')
+        showDialog('Éxito', 'Invitación reenviada exitosamente', 'success')
       } else {
         const data = await res.json()
-        alert(data.error || 'Error al reenviar invitación')
+        showDialog('Error', data.error || 'Error al reenviar invitación', 'error')
       }
     } catch (err) {
-      alert('Error de conexión')
+      showDialog('Error', 'Error de conexión', 'error')
     } finally {
       setActionLoading(null)
     }
   }
 
   const handleRestoreMember = async (teamId: string, memberId: string) => {
-    if (!confirm('¿Deseas restaurar este miembro al equipo?')) return
+    showConfirm(
+      'Restaurar Miembro',
+      '¿Deseas restaurar este miembro al equipo?',
+      async () => {
+        setActionLoading(`restore-${teamId}-${memberId}`)
+        try {
+          const res = await fetch('/api/organizations/members/restore', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ organization_id: teamId, member_id: memberId })
+          })
 
-    setActionLoading(`restore-${teamId}-${memberId}`)
-    try {
-      const res = await fetch('/api/organizations/members/restore', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ organization_id: teamId, member_id: memberId })
-      })
-
-      if (res.ok) {
-        const data = await res.json()
-        setTeams(teams.map(t => {
-          if (t.id === teamId) {
-            return {
-              ...t,
-              members: t.members?.map(m => m.id === memberId ? data.member : m)
-            }
+          if (res.ok) {
+            const data = await res.json()
+            setTeams(teams.map(t => {
+              if (t.id === teamId) {
+                return {
+                  ...t,
+                  members: t.members?.map(m => m.id === memberId ? data.member : m)
+                }
+              }
+              return t
+            }))
+            showDialog('Éxito', 'Miembro restaurado exitosamente', 'success')
+          } else {
+            const data = await res.json()
+            showDialog('Error', data.error || 'Error al restaurar miembro', 'error')
           }
-          return t
-        }))
-        alert('Miembro restaurado exitosamente')
-      } else {
-        const data = await res.json()
-        alert(data.error || 'Error al restaurar miembro')
-      }
-    } catch (err) {
-      alert('Error de conexión')
-    } finally {
-      setActionLoading(null)
-    }
+        } catch (err) {
+          showDialog('Error', 'Error de conexión', 'error')
+        } finally {
+          setActionLoading(null)
+        }
+      },
+      'Restaurar'
+    )
   }
 
   const handleRecoverByEmail = async (teamId: string, email: string) => {
@@ -208,22 +266,7 @@ export function TeamsTable({ onRefresh }: { onRefresh?: () => void }) {
     if (member) {
       await handleRestoreMember(teamId, member.id)
     } else {
-      alert('No se encontró un miembro eliminado con ese email')
-    }
-  }
-
-  const getRoleLabel = (role?: string) => {
-    const option = ROLE_OPTIONS.find(r => r.value === role)
-    return option?.label || 'Miembro'
-  }
-
-  const getRoleBadgeColor = (role?: string) => {
-    switch (role) {
-      case 'sysadmin': return 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300'
-      case 'account_admin': return 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
-      case 'account_user': return 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300'
-      case 'account_observer': return 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300'
-      default: return 'bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300'
+      showDialog('Miembro no encontrado', 'No se encontró un miembro eliminado con ese email', 'error')
     }
   }
 
@@ -260,6 +303,15 @@ export function TeamsTable({ onRefresh }: { onRefresh?: () => void }) {
           <p className="text-red-600 dark:text-red-400 text-sm font-bold">{error}</p>
         </div>
       )}
+
+      <Dialog
+        isOpen={dialog.isOpen}
+        onClose={closeDialog}
+        title={dialog.title}
+        message={dialog.message}
+        type={dialog.type}
+        actions={dialog.actions}
+      />
 
       {teams.length === 0 ? (
         <div className="p-8 text-center">
@@ -330,6 +382,7 @@ export function TeamsTable({ onRefresh }: { onRefresh?: () => void }) {
                   onResendInvite={handleResendInvite}
                   onRemoveMember={handleRemoveMember}
                   onRestoreMember={handleRestoreMember}
+                  onShowDialog={showDialog}
                 />
               )}
             </div>
@@ -347,7 +400,8 @@ function TeamMembersSection({
   onUpdateRole,
   onResendInvite,
   onRemoveMember,
-  onRestoreMember
+  onRestoreMember,
+  onShowDialog,
 }: { 
   team: Team
   actionLoading: string | null
@@ -355,6 +409,7 @@ function TeamMembersSection({
   onResendInvite: (teamId: string, email: string) => Promise<void>
   onRemoveMember: (teamId: string, memberId: string) => Promise<void>
   onRestoreMember: (teamId: string, memberId: string) => Promise<void>
+  onShowDialog: (title: string, message: string, type?: 'info' | 'success' | 'warning' | 'error') => void
 }) {
   const [activeTab, setActiveTab] = useState<'active' | 'removed'>('active')
   const [recoverEmail, setRecoverEmail] = useState('')
@@ -371,7 +426,7 @@ function TeamMembersSection({
       setRecoverEmail('')
       setShowRecoverInput(false)
     } else {
-      alert('No se encontró un miembro eliminado con ese email')
+      onShowDialog('Miembro no encontrado', 'No se encontró un miembro eliminado con ese email', 'error')
     }
   }
 

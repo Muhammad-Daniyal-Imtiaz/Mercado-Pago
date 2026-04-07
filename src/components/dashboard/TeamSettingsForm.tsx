@@ -1,7 +1,8 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { Settings, Users, Trash2, AlertTriangle, Save, X } from 'lucide-react'
+import { Dialog, type DialogAction } from '@/components/alerts/Dialog'
 
 interface TeamSettings {
   id: string
@@ -23,7 +24,48 @@ export function TeamSettingsForm({ teamId }: { teamId: string }) {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [name, setName] = useState('')
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  
+  // Dialog state
+  const [dialog, setDialog] = useState<{
+    isOpen: boolean
+    title: string
+    message: string
+    type: 'info' | 'success' | 'warning' | 'error' | 'confirm'
+    actions: DialogAction[]
+  }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    type: 'info',
+    actions: [],
+  })
+
+  const closeDialog = useCallback(() => {
+    setDialog(prev => ({ ...prev, isOpen: false }))
+  }, [])
+
+  const showDialog = useCallback((title: string, message: string, type: 'info' | 'success' | 'warning' | 'error' = 'info') => {
+    setDialog({
+      isOpen: true,
+      title,
+      message,
+      type,
+      actions: [{ label: 'Aceptar', variant: 'primary', onClick: () => closeDialog() }],
+    })
+  }, [closeDialog])
+
+  const showConfirm = useCallback((title: string, message: string, onConfirm: () => void, confirmLabel = 'Confirmar') => {
+    setDialog({
+      isOpen: true,
+      title,
+      message,
+      type: 'confirm',
+      actions: [
+        { label: 'Cancelar', variant: 'ghost', onClick: closeDialog },
+        { label: confirmLabel, variant: 'danger', onClick: () => { closeDialog(); onConfirm() } },
+      ],
+    })
+  }, [closeDialog])
 
   useEffect(() => {
     fetchTeam()
@@ -91,24 +133,29 @@ export function TeamSettingsForm({ teamId }: { teamId: string }) {
   }
 
   const handleDeleteTeam = async () => {
-    if (!confirm('¿Estás seguro de que deseas eliminar permanentemente este equipo? Esta acción no se puede deshacer.')) return
+    showConfirm(
+      'Eliminar Equipo',
+      '¿Estás seguro de que deseas eliminar permanentemente este equipo? Esta acción no se puede deshacer.',
+      async () => {
+        try {
+          const res = await fetch('/api/organizations/delete', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ organization_id: teamId })
+          })
 
-    try {
-      const res = await fetch('/api/organizations/delete', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ organization_id: teamId })
-      })
-
-      if (res.ok) {
-        window.location.href = '/dashboard/account_admin/settings'
-      } else {
-        const data = await res.json()
-        alert(data.error || 'Error al eliminar el equipo')
-      }
-    } catch (err) {
-      alert('Error de conexión')
-    }
+          if (res.ok) {
+            window.location.href = '/dashboard/account_admin/settings'
+          } else {
+            const data = await res.json()
+            showDialog('Error', data.error || 'Error al eliminar el equipo', 'error')
+          }
+        } catch (err) {
+          showDialog('Error', 'Error de conexión', 'error')
+        }
+      },
+      'Eliminar'
+    )
   }
 
   if (loading) {
@@ -215,38 +262,23 @@ export function TeamSettingsForm({ teamId }: { teamId: string }) {
           Las siguientes acciones son irreversibles. Ten cuidado.
         </p>
 
-        {!showDeleteConfirm ? (
-          <button
-            onClick={() => setShowDeleteConfirm(true)}
-            className="flex items-center gap-2 px-4 py-3 bg-red-600 text-white font-black rounded-lg transition-all hover:bg-red-700 text-xs uppercase tracking-widest"
-          >
-            <Trash2 className="w-4 h-4" />
-            Eliminar Equipo
-          </button>
-        ) : (
-          <div className="space-y-3">
-            <p className="text-sm text-red-700 dark:text-red-300 font-bold">
-              ¿Estás absolutamente seguro? Todos los datos del equipo se perderán.
-            </p>
-            <div className="flex gap-2">
-              <button
-                onClick={handleDeleteTeam}
-                className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white font-black rounded-lg transition-all hover:bg-red-700 text-xs uppercase tracking-widest"
-              >
-                <Trash2 className="w-4 h-4" />
-                Sí, eliminar
-              </button>
-              <button
-                onClick={() => setShowDeleteConfirm(false)}
-                className="flex items-center gap-2 px-4 py-2 bg-zinc-200 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 font-black rounded-lg transition-all hover:bg-zinc-300 dark:hover:bg-zinc-700 text-xs uppercase tracking-widest"
-              >
-                <X className="w-4 h-4" />
-                Cancelar
-              </button>
-            </div>
-          </div>
-        )}
+        <button
+          onClick={handleDeleteTeam}
+          className="flex items-center gap-2 px-4 py-3 bg-red-600 text-white font-black rounded-lg transition-all hover:bg-red-700 text-xs uppercase tracking-widest"
+        >
+          <Trash2 className="w-4 h-4" />
+          Eliminar Equipo
+        </button>
       </div>
+
+      <Dialog
+        isOpen={dialog.isOpen}
+        onClose={closeDialog}
+        title={dialog.title}
+        message={dialog.message}
+        type={dialog.type}
+        actions={dialog.actions}
+      />
     </div>
   )
 }
