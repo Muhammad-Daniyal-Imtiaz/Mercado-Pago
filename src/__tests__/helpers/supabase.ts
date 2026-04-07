@@ -53,11 +53,17 @@ export function mockSupabaseAuth(user: Record<string, unknown> | null) {
       ),
     },
     // Bind DB in case the endpoint does NOT use adminClient
-    from: jest.fn((_table: string) => createQueryMock([]))
+    from: jest.fn((table: string) => {
+      if (process.env.DEBUG_TESTS) console.log(`[mock from] ${table}`)
+      return createQueryMock([])
+    })
   });
 }
 
 export function mockSupabaseDB(responses: Record<string, unknown[]>): void {
-  const from = jest.fn((_table: string) => createQueryMock(responses[_table] || []));
+  const from = jest.fn((table: string) => {
+    if (process.env.DEBUG_TESTS) console.log(`[mock from DB] ${table}`)
+    return createQueryMock(responses[table] || [])
+  });
   (createAdminClient as jest.Mock).mockReturnValue({ from });
 }

@@ -13,7 +13,7 @@ export async function GET() {
   const adminClient = createAdminClient()
   const { data: profile, error: profileError } = await adminClient
     .from('users')
-    .select('*')
+    .select('id, email, full_name, avatar_url, is_verified, roles')
     .eq('id', authUser.id)
     .single()
 
@@ -23,7 +23,7 @@ export async function GET() {
         id: authUser.id,
         email: authUser.email,
         fullName: authUser.user_metadata?.full_name || authUser.email,
-        role: authUser.user_metadata?.role || 'account_user',
+        role: 'account_user',
         isVerified: authUser.user_metadata?.is_verified || false,
         organization: null,
         memberships: []
@@ -31,32 +31,61 @@ export async function GET() {
     })
   }
 
-  // Resolve all organizations the user is a member of
-  let userRoles = []
+  // Parse roles JSONB array - this is the single source of truth for user permissions
+  let userRoles: Array<{
+    organization_id: string
+    role: string
+    status?: string
+    is_primary?: boolean
+  }> = []
+  
   try {
-    userRoles = typeof profile.roles === 'string' ? JSON.parse(profile.roles) : (profile.roles || [])
+    userRoles = typeof profile.roles === 'string' 
+      ? JSON.parse(profile.roles) 
+      : (profile.roles || [])
   } catch (err) {
-    console.error('Error al parsear roles:', err)
+    console.error('Error parsing roles:', err)
     userRoles = []
   }
 
-  const { data: userOrgs } = await adminClient
-    .from('organizations')
-    .select('id, name')
-    .in('id', userRoles.map((r: { organization_id: string }) => r.organization_id))
+  // Filter active memberships only
+  const activeRoles = userRoles.filter(r => r.status !== 'removed')
 
-  const memberships = userRoles.map((r: { organization_id: string; role: string; status?: string }) => {
-    const org = userOrgs?.find((o: { id: string }) => o.id === r.organization_id)
+  // Get organization details for all memberships
+  const orgIds = activeRoles.map(r => r.organization_id)
+  
+  let userOrgs: Array<{ id: string; name: string }> = []
+  if (orgIds.length > 0) {
+    const { data: orgs } = await adminClient
+      .from('organizations')
+      .select('id, name')
+      .in('id', orgIds)
+    userOrgs = orgs || []
+  }
+
+  // Build memberships array
+  const memberships = activeRoles.map(r => {
+    const org = userOrgs.find(o => o.id === r.organization_id)
     return {
       organization_id: r.organization_id,
-      name: org?.name || 'Unknown Portal',
+      name: org?.name || 'Unknown Organization',
       role: r.role,
-      status: r.status || 'active'
+      status: r.status || 'active',
+      is_primary: r.is_primary || false
     }
   })
 
-  // The active session is based on the current profile row's organization_id
-  const activeOrg = memberships.find((m: { organization_id: string }) => m.organization_id === profile.organization_id) || memberships[0] || null
+  // Determine active organization:
+  // 1. First try the one marked as primary
+  // 2. Then fall back to first active membership
+  // 3. Null if no memberships
+  const activeOrg = memberships.find(m => m.is_primary) || memberships[0] || null
+
+  // Determine effective role:
+  // - 'sysadmin' is determined by having role='sysadmin' in ANY organization
+  // - Otherwise use the active organization's role
+  const isSysadmin = activeRoles.some(r => r.role === 'sysadmin')
+  const effectiveRole = isSysadmin ? 'sysadmin' : (activeOrg?.role || 'account_user')
 
   return NextResponse.json({
     user: {
@@ -65,9 +94,10 @@ export async function GET() {
       fullName: profile.full_name,
       avatarUrl: profile.avatar_url,
       isVerified: profile.is_verified,
-      role: activeOrg?.role || profile.role,
+      role: effectiveRole,
       organization: activeOrg,
-      memberships: memberships
+      memberships: memberships,
+      isSysadmin
     }
   })
 }

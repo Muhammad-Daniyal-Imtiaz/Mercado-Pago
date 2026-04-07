@@ -14,12 +14,11 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  // 2. Get current user's role and account_id - use ADMIN client to bypass RLS
+  // 2. Get current user's roles - use ADMIN client to bypass RLS
   const adminClient = createAdminClient()
   const { data: userData, error: userError } = await adminClient
     .from('users')
-    .select('role, organization_id, full_name, email')
-
+    .select('roles, full_name, email')
     .eq('id', user.id)
     .single()
 
@@ -31,18 +30,32 @@ export async function POST(request: Request) {
     }, { status: 404 })
   }
 
+  // Parse roles
+  let userRoles: Array<{
+    organization_id: string
+    role: string
+    status?: string
+    is_primary?: boolean
+  }> = []
+  try {
+    userRoles = typeof userData.roles === 'string' ? JSON.parse(userData.roles) : (userData.roles || [])
+  } catch {
+    userRoles = []
+  }
 
-  if (userData.role !== 'account_admin' && userData.role !== 'sysadmin') {
+  // Find role for target organization
+  const userOrgRole = userRoles.find((r: { organization_id: string }) => r.organization_id === organization_id)
+  const isSysadmin = userRoles.some((r: { role: string }) => r.role === 'sysadmin')
+
+  // Check permissions
+  if (!isSysadmin && userOrgRole?.role !== 'account_admin') {
     return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 })
   }
 
   // IDOR PROTECTION: Check if they are part of the TARGET organization (sysadmins can bypass)
-  if (userData.role !== 'sysadmin') {
-    if (!userData.organization_id || userData.organization_id !== organization_id) {
-       return NextResponse.json({ error: 'You can only invite members to your current active organization.' }, { status: 403 })
-    }
+  if (!isSysadmin && !userOrgRole) {
+    return NextResponse.json({ error: 'You can only invite members to organizations you belong to.' }, { status: 403 })
   }
-
 
   // 3. Generate 6-digit OTP
   const otp = Math.floor(100000 + Math.random() * 900000).toString()
