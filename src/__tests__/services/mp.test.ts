@@ -22,7 +22,7 @@ describe('mpService › getRecentPayments', () => {
     jest.clearAllMocks();
   });
 
-  it('fetches payments from Mercado Pago API and returns results', async () => {
+  it('should fetch payments from Mercado Pago API and return results', async () => {
     const mockPayments = [{ id: 1, transaction_amount: 100, status: 'approved' }];
     mockedAxios.get.mockResolvedValue({ data: { results: mockPayments } });
 
@@ -37,7 +37,7 @@ describe('mpService › getRecentPayments', () => {
     expect(result).toEqual(mockPayments);
   });
 
-  it('returns empty array if results are missing', async () => {
+  it('should return empty array when results are missing', async () => {
     mockedAxios.get.mockResolvedValue({ data: {} });
     const result = await getRecentPayments();
     expect(result).toEqual([]);
@@ -45,7 +45,7 @@ describe('mpService › getRecentPayments', () => {
 });
 
 describe('mpService › getPaymentById', () => {
-  it('enriches payment data with payer info from poi', async () => {
+  it('should enrich payment data with payer info from point_of_interaction', async () => {
     const mockPayment = {
       id: 123,
       transaction_amount: 100,
@@ -64,7 +64,7 @@ describe('mpService › getPaymentById', () => {
     expect(result?.netAmount).toBe(100);
   });
 
-  it('calls arcaService if name is missing but CUIT is present', async () => {
+  it('should call arcaService when name is missing but CUIT is present', async () => {
     const mockPayment = {
       id: 123,
       payer: {
@@ -82,7 +82,7 @@ describe('mpService › getPaymentById', () => {
 });
 
 describe('mpService › fetchNewNotifications', () => {
-    it('returns only new payments since lastProcessedId', async () => {
+    it('should return only new payments since lastProcessedId', async () => {
         const mockPayments = [
             { id: 300, status: 'approved', date_created: '2024-01-01', transaction_amount: 10 },
             { id: 200, status: 'approved', date_created: '2024-01-01', transaction_amount: 10 },

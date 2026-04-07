@@ -52,7 +52,7 @@ function setupMocks(user: Record<string, unknown> | null, dbResponses: Record<st
 describe('API Route › /api/auth/session', () => {
   beforeEach(() => jest.clearAllMocks());
 
-  it('returns 401 if no authenticated user', async () => {
+  it('should return 401 when no authenticated user', async () => {
     setupMocks(null);
 
     const res = await getSession();
@@ -60,7 +60,7 @@ describe('API Route › /api/auth/session', () => {
     expect(status).toBe(401);
   });
 
-  it('returns user data with profile and memberships', async () => {
+  it('should return user data with profile and memberships', async () => {
     setupMocks(
       { id: 'user-1', email: 'test@example.com', user_metadata: {} },
       {
@@ -87,7 +87,7 @@ describe('API Route › /api/auth/session', () => {
     expect(data.user.memberships).toBeDefined();
   });
 
-  it('returns basic user data if profile is not found', async () => {
+  it('should return basic user data when profile is not found', async () => {
     setupMocks(
       { id: 'user-1', email: 'test@example.com', user_metadata: { full_name: 'Fallback Name', role: 'account_user' } },
       { users: [] } // No profile found → single() returns null

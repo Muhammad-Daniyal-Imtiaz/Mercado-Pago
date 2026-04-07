@@ -24,7 +24,7 @@ import { createMockRequest, parseResponse } from '../helpers/api';
 describe('API Route › /api/mp/monitor', () => {
     beforeEach(() => jest.clearAllMocks());
 
-    it('returns monitor cycle results and history', async () => {
+    it('should return monitor cycle results and history', async () => {
         const mockNew = [{ id: 1, amount: 100 }];
         const mockHistory = [{ id: 1, amount: 100 }, { id: 0, amount: 50 }];
         const mockState = { isInitialized: true, totalResolved: 2 };
@@ -42,7 +42,7 @@ describe('API Route › /api/mp/monitor', () => {
         expect(data.state.totalResolved).toBe(2);
     });
 
-    it('handles service errors with 500 status', async () => {
+    it('should handle service errors with 500 status', async () => {
         (runMonitorCycle as jest.Mock).mockRejectedValue(new Error('Monitor Failure'));
 
         const res = await getMonitor();
@@ -56,7 +56,7 @@ describe('API Route › /api/mp/monitor', () => {
 describe('API Route › /api/mp/payment/[id]', () => {
     beforeEach(() => jest.clearAllMocks());
 
-    it('returns payment details for valid ID', async () => {
+    it('should return payment details for valid ID', async () => {
         const mockResult = { payment: { id: 123 }, payer: { name: 'TEST' }, netAmount: 100 };
         (getPaymentById as jest.Mock).mockResolvedValue(mockResult);
 
@@ -69,7 +69,7 @@ describe('API Route › /api/mp/payment/[id]', () => {
         expect(data.payer.name).toBe('TEST');
     });
 
-    it('returns 404 if payment not found', async () => {
+    it('should return 404 when payment is not found', async () => {
         (getPaymentById as jest.Mock).mockResolvedValue(null);
 
         const req = createMockRequest('http://api/mp/payment/999');
@@ -79,7 +79,7 @@ describe('API Route › /api/mp/payment/[id]', () => {
         expect(status).toBe(404);
     });
 
-    it('returns 500 on service error', async () => {
+    it('should return 500 on service error', async () => {
         (getPaymentById as jest.Mock).mockRejectedValue(new Error('MP API down'));
 
         const req = createMockRequest('http://api/mp/payment/123');

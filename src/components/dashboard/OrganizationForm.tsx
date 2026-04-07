@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { Users } from 'lucide-react'
 
 export function OrganizationForm({ onSuccess }: { onSuccess?: () => void }) {
   const [name, setName] = useState('')
@@ -36,7 +37,7 @@ export function OrganizationForm({ onSuccess }: { onSuccess?: () => void }) {
 
   return (
     <div className="w-full p-5 sm:p-8 bg-white dark:bg-zinc-900 rounded-2xl shadow-sm border border-zinc-200 dark:border-zinc-800 transition-colors">
-      <h2 className="text-2xl sm:text-3xl font-black mb-6 text-zinc-900 dark:text-white uppercase tracking-tight">Crear equipo</h2>
+      <h2 className="text-2xl sm:text-3xl font-black mb-6 text-zinc-900 dark:text-white uppercase tracking-tight"><Users className="inline-block w-8 h-8 mr-2" /> Crear equipo</h2>
       <form onSubmit={handleCreate} className="space-y-4">
         <div>
           <label className="block text-[10px] font-black uppercase tracking-widest text-zinc-500 dark:text-zinc-400 mb-2">

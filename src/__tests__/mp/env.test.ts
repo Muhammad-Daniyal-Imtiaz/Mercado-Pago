@@ -12,19 +12,19 @@ import path from 'path';
 config({ path: path.resolve(process.cwd(), '.env.local') });
 
 describe('Environment Configuration › Mercado Pago', () => {
-  it('should have MP_ACCESS_TOKEN configured', () => {
+  it('should have MP_ACCESS_TOKEN configured with valid length', () => {
     expect(process.env.MP_ACCESS_TOKEN).toBeDefined();
     expect((process.env.MP_ACCESS_TOKEN as string).length).toBeGreaterThan(10);
   });
 });
 
 describe('Environment Configuration › ARCA / AFIP', () => {
-  it('should have AFIP_CUIT configured', () => {
+  it('should have AFIP_CUIT configured with exactly 11 digits', () => {
     expect(process.env.AFIP_CUIT).toBeDefined();
     expect(process.env.AFIP_CUIT!.replace(/\D/g, '').length).toBe(11);
   });
 
-  it('should have certificate and key files in the root directory', () => {
+  it('should have certificate and key files present in the root directory', () => {
     const certPath = path.resolve(process.cwd(), 'produccion_certificado.crt');
     const keyPath  = path.resolve(process.cwd(), 'produccion_privada.key');
     expect(fs.existsSync(certPath)).toBe(true);

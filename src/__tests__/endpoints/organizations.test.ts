@@ -53,7 +53,7 @@ function setupMocks(user: Record<string, unknown> | null, dbResponses: Record<st
 describe('API Route › /api/organizations/list', () => {
   beforeEach(() => jest.clearAllMocks());
 
-  it('returns empty list if user is authenticated and has no orgs', async () => {
+  it('should return empty list when user is authenticated but has no organizations', async () => {
     setupMocks({ id: 'user-1' }, { organizations: [] });
 
     const req = createMockRequest('http://api/organizations/list');
@@ -64,7 +64,7 @@ describe('API Route › /api/organizations/list', () => {
     expect(data.organizations).toEqual([]);
   });
 
-  it('returns 401 if user is unauthenticated', async () => {
+  it('should return 401 when user is unauthenticated', async () => {
     setupMocks(null);
 
     const req = createMockRequest('http://api/organizations/list');
@@ -78,7 +78,7 @@ describe('API Route › /api/organizations/list', () => {
 describe('API Route › /api/organizations/create', () => {
   beforeEach(() => jest.clearAllMocks());
 
-  it('returns 401 if user is not authenticated', async () => {
+  it('should return 401 when user is not authenticated', async () => {
     setupMocks(null);
 
     const req = createMockRequest('http://api/organizations/create', {
@@ -91,7 +91,7 @@ describe('API Route › /api/organizations/create', () => {
     expect(status).toBe(401);
   });
 
-  it('creates a new organization for an admin user', async () => {
+  it('should create a new organization for an admin user', async () => {
     setupMocks(
       { id: 'user-1', email: 'test@example.com' },
       {

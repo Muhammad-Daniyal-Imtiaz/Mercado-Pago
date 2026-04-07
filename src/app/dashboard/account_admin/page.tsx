@@ -1,7 +1,5 @@
 import RoleGuard from '@/components/auth/RoleGuard'
 import { UserProfile } from '@/components/dashboard/UserProfile'
-import InviteForm from '@/components/auth/InviteForm'
-import { OrganizationForm } from '@/components/dashboard/OrganizationForm'
 import NotificationsPanel from '@/components/dashboard/mp/NotificationsPanel'
 
 
@@ -10,13 +8,6 @@ export default function AccountAdminDashboard() {
     <RoleGuard allowedRoles={['account_admin']}>
       <div className="space-y-8 p-4 sm:p-6 lg:p-8">
         <UserProfile />
-        <div className='space-y-6'>
-          <h2 className="text-2xl font-black text-zinc-900 dark:text-white tracking-tight uppercase">Mis Equipos</h2>
-          <div className="grid grid-cols-2 gap-6">
-            <OrganizationForm />
-            <InviteForm />
-          </div>
-        </div>
         {/* ── Monitor de Pagos Mercado Pago ── */}
         <div className='space-y-6'>
           <h2 className="text-2xl font-black text-zinc-900 dark:text-white tracking-tight uppercase">Monitor de Pagos</h2>

@@ -41,7 +41,7 @@ describe('arcaService › getNameFromAfip', () => {
     expect(result).toBeNull();
   });
 
-  it('extracts the name in "last name, first name" format from AFIP details', async () => {
+  it('should extract the name from AFIP details in "last name, first name" format', async () => {
     mockArcaInstance.registerScopeThirteenService.getTaxpayerDetails.mockResolvedValue({
       idPersona: 23326892599,
       datosGenerales: {
@@ -53,7 +53,7 @@ describe('arcaService › getNameFromAfip', () => {
     expect(result).toBe('ANDRADA GUILLERMO DAVID');
   });
 
-  it('returns business name if it is a company', async () => {
+  it('should return business name when querying a company CUIT', async () => {
     mockArcaInstance.registerScopeThirteenService.getTaxpayerDetails.mockResolvedValue({
       datosGenerales: {
         razonSocial: 'COTO C.I.C.S.A.',
@@ -63,13 +63,13 @@ describe('arcaService › getNameFromAfip', () => {
     expect(result).toBe('COTO C.I.C.S.A.');
   });
 
-  it('returns null if the service result is empty', async () => {
+  it('should return null when the service result is empty', async () => {
     mockArcaInstance.registerScopeThirteenService.getTaxpayerDetails.mockResolvedValue(null);
     const result = await getNameFromAfip('23326892599');
     expect(result).toBeNull();
   });
 
-  it('returns null and does not throw on "Not enabled" error', async () => {
+  it('should return null and not throw on "Not enabled" error', async () => {
     mockArcaInstance.registerScopeThirteenService.getTaxpayerDetails.mockRejectedValue(
       new Error('Not enabled for this CUIT')
     );
@@ -77,7 +77,7 @@ describe('arcaService › getNameFromAfip', () => {
     expect(result).toBeNull();
   });
 
-  it('cleans non-numeric characters from CUIT before querying', async () => {
+  it('should clean non-numeric characters from CUIT before querying', async () => {
     mockArcaInstance.registerScopeThirteenService.getTaxpayerDetails.mockResolvedValue({
       datosGenerales: { razonSocial: 'TEST' },
     });
@@ -89,7 +89,7 @@ describe('arcaService › getNameFromAfip', () => {
 });
 
 describe('arcaService › module export', () => {
-  it('exports the arca object (may be null if certs are missing)', () => {
+  it('should export the arca object (may be null if certs are missing)', () => {
     // arca can be null in CI without real certs; just checking export exists
     expect(arca !== undefined).toBe(true);
   });
