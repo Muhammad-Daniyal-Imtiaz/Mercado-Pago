@@ -68,7 +68,7 @@ export default function SignupForm() {
     <div className="relative w-full max-w-md mx-auto p-8 bg-white dark:bg-zinc-900 rounded-2xl shadow-xl border border-zinc-200 dark:border-zinc-800">
       <div className="text-center mb-10">
         <h1 className="text-3xl font-black tracking-tighter text-zinc-900 dark:text-zinc-100 uppercase">Crear Cuenta</h1>
-        <p className="mt-2 text-zinc-500 dark:text-zinc-400 font-medium">Únete a AlertApp y gestiona tu equipo</p>
+        <p className="mt-2 text-zinc-500 dark:text-zinc-400 font-medium">Únete a Pay Alert y gestiona tu equipo</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-5">

@@ -68,7 +68,7 @@ export async function GET() {
     const org = userOrgs.find(o => o.id === r.organization_id)
     return {
       organization_id: r.organization_id,
-      name: org?.name || 'Unknown Organization',
+      name: org?.name || 'Equipo no asignado',
       role: r.role,
       status: r.status || 'active',
       is_primary: r.is_primary || false
