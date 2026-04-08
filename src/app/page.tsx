@@ -39,7 +39,6 @@ export default function Home() {
       features: [
         "Hasta 3 usuarios observadores",
         "Notificaciones en tiempo real",
-        /* "Webhook + REST API", */
         "Soporte por email",
         "Dashboard básico"
       ],
@@ -54,7 +53,6 @@ export default function Home() {
       features: [
         "Hasta 10 usuarios observadores",
         "Notificaciones multi-dispositivo",
-        /* "Webhook + REST + WebSockets", */
         "Soporte prioritario",
         "Analytics avanzado",
         "Exportación de datos"
@@ -70,7 +68,6 @@ export default function Home() {
       features: [
         "Usuarios ilimitados",
         "Notificaciones personalizadas",
-        /* "API completa dedicada", */
         "Soporte 24/7",
         "Dashboard personalizado",
         "Integraciones a medida",
