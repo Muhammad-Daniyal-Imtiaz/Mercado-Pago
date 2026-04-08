@@ -56,7 +56,7 @@ export async function GET(request: Request) {
       } else {
         // NEW USER (or missing role): Create initial profile
         const now = new Date().toISOString()
-        await admin
+        const { error: upsertError } = await admin
           .from('users')
           .upsert({
             id: user.id,
@@ -72,15 +72,20 @@ export async function GET(request: Request) {
             is_active: true,
             is_verified: true,  // Google users are pre-verified
             email_confirmed_at: now,
-            notification_preferences: JSON.stringify({ sms: false, push: true, email: true, digest: 'instant' }),
-            alert_channels: JSON.stringify({ low: ['email'], high: ['email', 'push'], medium: ['email'], critical: ['email', 'push', 'sms'] }),
+            notification_preferences: { sms: false, push: true, email: true, digest: 'instant' },
+            alert_channels: { low: ['email'], high: ['email', 'push'], medium: ['email'], critical: ['email', 'push', 'sms'] },
             last_login_at: now,
             last_active_at: now,
-            metadata: JSON.stringify({ provider: 'google' }),
+            metadata: { provider: 'google' },
             created_at: now,
             updated_at: now,
-            roles: JSON.stringify([{ organization_id: null, role: role, status: 'active', is_primary: true }])
+            roles: [{ organization_id: null, role: role, status: 'active', is_primary: true }]
           }, { onConflict: 'id' })
+        
+        if (upsertError) {
+          console.error('Callback - Database error:', upsertError)
+          return NextResponse.redirect(`${baseUrl}/login?error=database_error&message=${encodeURIComponent(upsertError.message)}`)
+        }
 
         return NextResponse.redirect(`${baseUrl}/dashboard/${role}`)
       }

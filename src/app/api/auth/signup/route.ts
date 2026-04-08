@@ -46,14 +46,14 @@ export async function POST(request: Request) {
       is_active: true,
       is_verified: false,
       email_confirmed_at: null,
-      notification_preferences: JSON.stringify({ sms: false, push: true, email: true, digest: 'instant' }),
-      alert_channels: JSON.stringify({ low: ['email'], high: ['email', 'push'], medium: ['email'], critical: ['email', 'push', 'sms'] }),
+      notification_preferences: { sms: false, push: true, email: true, digest: 'instant' },
+      alert_channels: { low: ['email'], high: ['email', 'push'], medium: ['email'], critical: ['email', 'push', 'sms'] },
       last_login_at: null,
       last_active_at: null,
-      metadata: JSON.stringify({}),
+      metadata: {},
       created_at: now,
       updated_at: now,
-      roles: JSON.stringify([{ organization_id: null, role: role, status: 'active', is_primary: true }])
+      roles: [{ organization_id: null, role: role, status: 'active', is_primary: true }]
     }
     
     console.log('Creating user profile with data:', userData)
