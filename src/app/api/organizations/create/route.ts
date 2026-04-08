@@ -98,5 +98,60 @@ export async function POST(request: Request) {
     .update({ roles: updatedRoles })
     .eq('id', user.id)
 
+  // 5. Si el creador es account_admin, crear automáticamente una cuenta vinculada
+  if (creatorRole === 'account_admin') {
+    // Generar slug único para la cuenta
+    const baseSlug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')
+    let slug = baseSlug
+    let counter = 1
+    
+    while (true) {
+      const { data: existing } = await adminClient
+        .from('accounts')
+        .select('id')
+        .eq('slug', slug)
+        .single()
+      
+      if (!existing) break
+      
+      slug = `${baseSlug}-${counter}`
+      counter++
+    }
+
+    // Crear la cuenta con plan básico y 15 días de prueba
+    const { error: accountError } = await adminClient
+      .from('accounts')
+      .insert({
+        name: `${name} - Account`,
+        slug,
+        account_admin_id: orgData.id,
+        plan_type: 'basic',
+        billing_status: 'trial',
+        payment_method: 'manual',
+        current_balance: 0,
+        next_billing_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        trial_ends_at: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString(),
+        usage_stats: {},
+        plan_limits: {
+          max_users: 3,
+          max_alerts: 100,
+          max_integrations: 2,
+          max_invitations: 5,
+          api_calls_per_month: 1000,
+          support_level: 'email',
+          custom_branding: false,
+          advanced_analytics: false,
+          webhooks: false
+        },
+        billing_metadata: {}
+      })
+
+    if (accountError) {
+      console.error('Account Creation Error:', accountError)
+      // No fallar la creación de la organización si falla la cuenta
+      console.warn('Organization created but account creation failed')
+    }
+  }
+
   return NextResponse.json({ success: true, organization: orgData })
 }
