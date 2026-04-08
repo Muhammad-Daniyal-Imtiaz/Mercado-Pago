@@ -1,6 +1,7 @@
 import { createClient } from '@/utils/supabase/server'
 import { createAdminClient } from '@/utils/supabase/admin'
 import { translateAuthError } from '@/lib/auth-errors'
+import { syncUserRoles } from '@/lib/role-sync'
 import { NextResponse } from 'next/server'
 
 export async function POST(request: Request) {
@@ -105,6 +106,16 @@ export async function POST(request: Request) {
 
   // 5. Delete invitation
   await adminClient.from('invitations').delete().eq('id', invitation.id)
+
+  // 6. Sync roles to ensure consistency
+  if (authData.user?.id) {
+    try {
+      await syncUserRoles(authData.user.id)
+    } catch (syncError) {
+      console.error('Error syncing roles after invitation:', syncError)
+      // Don't fail the request, but log the error
+    }
+  }
 
   return NextResponse.json({ 
     success: true, 

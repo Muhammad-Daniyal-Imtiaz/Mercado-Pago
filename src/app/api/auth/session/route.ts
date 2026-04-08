@@ -1,5 +1,6 @@
 import { createClient } from '@/utils/supabase/server'
 import { createAdminClient } from '@/utils/supabase/admin'
+import { checkRoleConsistency, syncUserRoles } from '@/lib/role-sync'
 import { NextResponse } from 'next/server'
 
 export async function GET() {
@@ -81,6 +82,55 @@ export async function GET() {
   // 3. Null if no memberships
   const activeOrg = memberships.find(m => m.is_primary) || memberships[0] || null
 
+  // Check role consistency and sync if needed
+  const isConsistent = await checkRoleConsistency(profile.id)
+  if (!isConsistent) {
+    console.log(`[ROLE_SYNC] Inconsistent roles detected for user ${profile.id}, syncing...`)
+    try {
+      await syncUserRoles(profile.id)
+      // Re-fetch user data after sync
+      const { data: syncedProfile } = await adminClient
+        .from('users')
+        .select('roles')
+        .eq('id', profile.id)
+        .single()
+      
+      if (syncedProfile) {
+        let syncedUserRoles = []
+        try {
+          syncedUserRoles = typeof syncedProfile.roles === 'string' 
+            ? JSON.parse(syncedProfile.roles) 
+            : (syncedProfile.roles || [])
+        } catch (err) {
+          console.error('Error parsing synced roles:', err)
+        }
+        
+        // Update active roles with synced data
+        const syncedActiveRoles = syncedUserRoles.filter(r => r.status !== 'removed')
+        const syncedActiveOrg = syncedActiveRoles.find(r => r.is_primary) || syncedActiveRoles[0] || null
+        const syncedIsSysadmin = syncedActiveRoles.some(r => r.role === 'sysadmin')
+        const syncedEffectiveRole = syncedIsSysadmin ? 'sysadmin' : (syncedActiveOrg?.role || 'account_user')
+        
+        return NextResponse.json({
+          user: {
+            id: profile.id,
+            email: profile.email,
+            fullName: profile.full_name,
+            avatarUrl: profile.avatar_url,
+            isVerified: profile.is_verified,
+            role: syncedEffectiveRole,
+            organization: syncedActiveOrg,
+            memberships: memberships,
+            isSysadmin: syncedIsSysadmin,
+            rolesSynced: true
+          }
+        })
+      }
+    } catch (syncError) {
+      console.error('Error syncing roles in session:', syncError)
+    }
+  }
+
   // Determine effective role:
   // - 'sysadmin' is determined by having role='sysadmin' in ANY organization
   // - Otherwise use the active organization's role
@@ -97,7 +147,8 @@ export async function GET() {
       role: effectiveRole,
       organization: activeOrg,
       memberships: memberships,
-      isSysadmin
+      isSysadmin,
+      rolesSynced: false
     }
   })
 }
