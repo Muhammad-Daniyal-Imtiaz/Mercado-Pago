@@ -4,10 +4,15 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Loader2, CheckCircle, AlertCircle } from 'lucide-react'
 
+interface UserDetails {
+  email: string
+  roles?: { role: string }[]
+}
+
 export default function SyncPage() {
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading')
   const [message, setMessage] = useState('Sincronizando usuario...')
-  const [details, setDetails] = useState<any>(null)
+  const [details, setDetails] = useState<UserDetails | null>(null)
   const router = useRouter()
 
   useEffect(() => {
@@ -29,9 +34,9 @@ export default function SyncPage() {
           setMessage(data.error || 'Error al sincronizar')
           setDetails(data)
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         setStatus('error')
-        setMessage('Error de conexión: ' + err.message)
+        setMessage('Error de conexión: ' + (err instanceof Error ? err.message : String(err)))
       }
     }
 

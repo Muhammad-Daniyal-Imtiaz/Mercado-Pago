@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { getNameFromAfip } from './arcaService';
-import { getOrganizationMPCredentials, getCurrentUserOrganizationMPCredentials } from './credentials';
+import { getOrganizationMPCredentials } from './credentials';
 
 const MP_ACCESS_TOKEN = process.env.MP_ACCESS_TOKEN ?? '';
 const MP_API_BASE     = 'https://api.mercadopago.com/v1';

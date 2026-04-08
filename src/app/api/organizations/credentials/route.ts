@@ -22,7 +22,12 @@ export async function GET(request: Request) {
     .single()
 
   if (userError || !userData) {
-    return NextResponse.json({ error: 'User data not found' }, { status: 404 })
+    console.error('GET /credentials - User lookup failed:', { userId: user.id, error: userError?.message })
+    return NextResponse.json({ 
+      error: 'User data not found', 
+      details: userError?.message,
+      userId: user.id 
+    }, { status: 404 })
   }
 
   // Parse roles

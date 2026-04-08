@@ -2,7 +2,6 @@ import crypto from 'crypto'
 
 const ALGORITHM = 'aes-256-gcm'
 const IV_LENGTH = 16
-const AUTH_TAG_LENGTH = 16
 
 // Master key from environment - must be 32 bytes (64 hex chars)
 const MASTER_KEY = process.env.MASTER_ENCRYPTION_KEY
