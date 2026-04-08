@@ -97,7 +97,7 @@ export function withRoleValidation(
   handler: (request: NextRequest, context: { userId: string; role: string }) => Promise<NextResponse>,
   options: RoleValidationOptions = {}
 ) {
-  return async (request: NextRequest, context?: any) => {
+  return async (request: NextRequest) => {
     const validation = await validateRoleAccess(request, options)
     
     if (!validation.success) {
@@ -116,11 +116,11 @@ export function withRoleValidation(
  * Validaciones específicas para diferentes tipos de endpoints
  */
 
-export const requireSysadmin = (handler: any) => 
+export const requireSysadmin = (handler: (request: NextRequest, context: { userId: string; role: string }) => Promise<NextResponse>) => 
   withRoleValidation(handler, { requiredRole: 'sysadmin', logAccess: true })
 
-export const requireAccountAdmin = (handler: any) => 
+export const requireAccountAdmin = (handler: (request: NextRequest, context: { userId: string; role: string }) => Promise<NextResponse>) => 
   withRoleValidation(handler, { requiredRole: 'account_admin', logAccess: true })
 
-export const requireAnyRole = (handler: any) => 
+export const requireAnyRole = (handler: (request: NextRequest, context: { userId: string; role: string }) => Promise<NextResponse>) => 
   withRoleValidation(handler, { requiredRole: 'any', logAccess: false })

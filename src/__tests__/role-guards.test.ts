@@ -1,20 +1,30 @@
 import { RoleGuards } from '@/lib/role-guards'
 import { createAdminClient } from '@/utils/supabase/admin'
+import { checkRoleConsistency, syncUserRoles } from '@/lib/role-sync'
 
 // Mock de Supabase y role-sync
 jest.mock('@/utils/supabase/admin')
-jest.mock('@/lib/role-sync', () => ({
-  checkRoleConsistency: jest.fn(),
-  syncUserRoles: jest.fn()
-}))
+jest.mock('@/lib/role-sync')
 
 const mockAdminClient = createAdminClient as jest.MockedFunction<typeof createAdminClient>
-const mockCheckRoleConsistency = require('@/lib/role-sync').checkRoleConsistency as jest.MockedFunction<any>
-const mockSyncUserRoles = require('@/lib/role-sync').syncUserRoles as jest.MockedFunction<any>
+const mockCheckRoleConsistency = checkRoleConsistency as jest.MockedFunction<(userId: string) => Promise<boolean>>
+const mockSyncUserRoles = syncUserRoles as jest.MockedFunction<(userId: string) => Promise<boolean>>
 
 describe('RoleGuards', () => {
   let roleGuards: RoleGuards
-  let mockClient: any
+  let mockClient: {
+  from: jest.Mock
+  select: jest.Mock
+  eq: jest.Mock
+  single: jest.Mock
+  update: jest.Mock
+  insert: jest.Mock
+  delete: jest.Mock
+  in: jest.Mock
+  filter: jest.Mock
+  order: jest.Mock
+  limit: jest.Mock
+}
 
   beforeEach(() => {
     // Reset all mocks
@@ -34,7 +44,8 @@ describe('RoleGuards', () => {
       order: jest.fn().mockReturnThis(),
       limit: jest.fn().mockReturnThis()
     }
-    mockAdminClient.mockReturnValue(mockClient)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    mockAdminClient.mockReturnValue(mockClient as any)
     
     roleGuards = new RoleGuards({
       enableAutoSync: true,
