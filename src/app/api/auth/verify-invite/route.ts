@@ -49,8 +49,6 @@ export async function POST(request: Request) {
       .from('users')
       .update({
         roles: updatedRoles,
-        role: invitation.role,
-        organization_id: invitation.organization_id,
         full_name: fullName || user.user_metadata?.full_name
       })
       .eq('id', user.id)

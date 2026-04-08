@@ -11,23 +11,63 @@ import {
 } from './types';
 
 /**
+ * Carga certificados AFIP desde archivos locales (desarrollo) o variables de entorno (producción)
+ * @returns {cert: string, key: string} o null si no se encuentran los certificados
+ */
+function loadCertificates(): { cert: string; key: string } | null {
+  try {
+    // En producción (Vercel), usar variables de entorno
+    if (process.env.NODE_ENV === 'production' || process.env.VERCEL_ENV) {
+      const crtBase64 = process.env.AFIP_PROD_CERTIFICATE_CRT || process.env.AFIP_CERTIFICATE_CRT;
+      const keyBase64 = process.env.AFIP_PROD_PRIVATE_KEY || process.env.AFIP_PRIVATE_KEY;
+      
+      if (!crtBase64 || !keyBase64) {
+        console.warn('[ARCA] Environment variables for certificates not found');
+        return null;
+      }
+      
+      const cert = Buffer.from(crtBase64, 'base64').toString();
+      const key = Buffer.from(keyBase64, 'base64').toString();
+      
+      return { cert, key };
+    }
+    
+    // En desarrollo local, usar archivos físicos
+    const certPath = path.join(process.cwd(), 'produccion_certificado.crt');
+    const keyPath = path.join(process.cwd(), 'produccion_privada.key');
+    
+    if (!fs.existsSync(certPath) || !fs.existsSync(keyPath)) {
+      console.warn('[ARCA] Certificate files not found');
+      return null;
+    }
+    
+    const cert = fs.readFileSync(certPath, 'utf8');
+    const key = fs.readFileSync(keyPath, 'utf8');
+    
+    return { cert, key };
+  } catch (error) {
+    console.error('[ARCA] Error loading certificates:', error);
+    return null;
+  }
+}
+
+/**
  * Initializes the ARCA (ex AFIP) instance with mandatory certificates.
  * @returns An ArcaInstance or null if certificates are missing.
  */
 function createArcaInstance(): ArcaInstance | null {
   try {
-    const certPath = path.join(process.cwd(), 'produccion_certificado.crt');
-    const keyPath = path.join(process.cwd(), 'produccion_privada.key');
-
-    if (!fs.existsSync(certPath) || !fs.existsSync(keyPath)) {
+    const certificates = loadCertificates();
+    
+    if (!certificates) {
       console.warn('[ARCA] Certificates not found. ARCA service will be disabled.');
       return null;
     }
 
     const options: ArcaOptions = {
       cuit: Number(process.env.AFIP_CUIT ?? 0),
-      cert: fs.readFileSync(certPath, 'utf8'),
-      key: fs.readFileSync(keyPath, 'utf8'),
+      cert: certificates.cert,
+      key: certificates.key,
       production: true,
       ticketStorage: new (FileSystemTicketStorage as unknown as { new(o: FileSystemTicketStorageOptions): ArcaTicketStorage })(
         { ticketFolder: process.cwd() }
