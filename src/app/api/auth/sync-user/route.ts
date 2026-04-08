@@ -13,8 +13,6 @@ export async function GET() {
     return NextResponse.json({ error: 'No hay sesión activa' }, { status: 401 })
   }
 
-  console.log('Syncing user:', authUser.id, authUser.email)
-
   // 2. Check if user exists in users table
   const { data: existingProfile } = await admin
     .from('users')
@@ -56,8 +54,6 @@ export async function GET() {
     updated_at: now,
     roles: [{ organization_id: null, role: role, status: 'active', is_primary: true }]
   }
-
-  console.log('Creating profile:', userData)
 
   const { error: upsertError } = await admin
     .from('users')

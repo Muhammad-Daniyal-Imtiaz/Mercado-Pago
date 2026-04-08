@@ -3,16 +3,10 @@
 import RoleGuard from '@/components/auth/RoleGuard';
 import { useFontSize } from '@/context/FontSizeContext';
 import { useTheme } from '@/context/ThemeContext';
-import { useEffect } from 'react';
 
 export default function ObserverSettings() {
   const { fontSize, setFontSize } = useFontSize();
   const { theme, setTheme, resolvedTheme } = useTheme();
-
-  useEffect(() => {
-    console.log('Theme:', theme);
-    console.log('Resolved theme:', resolvedTheme);
-  }, [theme, resolvedTheme]);
 
   return (
     <RoleGuard allowedRoles={['account_observer']}>

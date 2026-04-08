@@ -17,13 +17,6 @@ async function optimizeOGImage() {
       })
       .toFile(outputPath);
     
-    console.log('OG image optimized to 1200x630px');
-    
-    // Get image info
-    const metadata = await sharp(outputPath).metadata();
-    console.log(`New dimensions: ${metadata.width}x${metadata.height}`);
-    console.log(`File size: ${(metadata.size / 1024 / 1024).toFixed(2)}MB`);
-    
   } catch (error) {
     console.error('Error optimizing OG image:', error);
   }

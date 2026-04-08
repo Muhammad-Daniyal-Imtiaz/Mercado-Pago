@@ -56,8 +56,6 @@ export async function POST(request: Request) {
       roles: [{ organization_id: null, role: role, status: 'active', is_primary: true }]
     }
     
-    console.log('Creating user profile with data:', userData)
-    
     try {
       const { error: profileError } = await admin
         .from('users')

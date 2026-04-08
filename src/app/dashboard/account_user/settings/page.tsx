@@ -9,11 +9,6 @@ export default function UserSettings() {
   const { fontSize, setFontSize } = useFontSize();
   const { theme, setTheme, resolvedTheme } = useTheme();
 
-  useEffect(() => {
-    console.log('Theme:', theme);
-    console.log('Resolved theme:', resolvedTheme);
-  }, [theme, resolvedTheme]);
-
   return (
     <RoleGuard allowedRoles={['account_user']}>
       <div className="p-4 sm:p-6 lg:p-8">
