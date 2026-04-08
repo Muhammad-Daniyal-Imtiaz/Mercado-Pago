@@ -55,14 +55,31 @@ export async function GET(request: Request) {
         return NextResponse.redirect(`${baseUrl}/dashboard/${existingProfile.role}`)
       } else {
         // NEW USER (or missing role): Create initial profile
+        const now = new Date().toISOString()
         await admin
           .from('users')
           .upsert({
             id: user.id,
             email: user.email,
-            role: role,
             full_name: user.user_metadata?.full_name || user.email,
-            roles: JSON.stringify([{ organization_id: null, role: role }])
+            username: null,
+            avatar_url: user.user_metadata?.avatar_url || null,
+            phone: null,
+            account_id: null,
+            invitation_token: null,
+            invitation_expires_at: null,
+            invited_by: null,
+            is_active: true,
+            is_verified: true,  // Google users are pre-verified
+            email_confirmed_at: now,
+            notification_preferences: JSON.stringify({ sms: false, push: true, email: true, digest: 'instant' }),
+            alert_channels: JSON.stringify({ low: ['email'], high: ['email', 'push'], medium: ['email'], critical: ['email', 'push', 'sms'] }),
+            last_login_at: now,
+            last_active_at: now,
+            metadata: JSON.stringify({ provider: 'google' }),
+            created_at: now,
+            updated_at: now,
+            roles: JSON.stringify([{ organization_id: null, role: role, status: 'active', is_primary: true }])
           }, { onConflict: 'id' })
 
         return NextResponse.redirect(`${baseUrl}/dashboard/${role}`)

@@ -30,28 +30,52 @@ export async function POST(request: Request) {
   if (data.user) {
     const admin = createAdminClient()
     
-    // Prepare user data - ensure roles is properly formatted as JSON
+    // Prepare user data matching the actual table structure
+    const now = new Date().toISOString()
     const userData = {
       id: data.user.id,
       email: data.user.email,
-      role: role,
       full_name: full_name || data.user.email,
-      roles: JSON.stringify([{ organization_id: null, role: role }])
+      username: null,
+      avatar_url: null,
+      phone: null,
+      account_id: null,
+      invitation_token: null,
+      invitation_expires_at: null,
+      invited_by: null,
+      is_active: true,
+      is_verified: false,
+      email_confirmed_at: null,
+      notification_preferences: JSON.stringify({ sms: false, push: true, email: true, digest: 'instant' }),
+      alert_channels: JSON.stringify({ low: ['email'], high: ['email', 'push'], medium: ['email'], critical: ['email', 'push', 'sms'] }),
+      last_login_at: null,
+      last_active_at: null,
+      metadata: JSON.stringify({}),
+      created_at: now,
+      updated_at: now,
+      roles: JSON.stringify([{ organization_id: null, role: role, status: 'active', is_primary: true }])
     }
     
     console.log('Creating user profile with data:', userData)
     
-    const { error: profileError } = await admin
-      .from('users')
-      .upsert(userData, { onConflict: 'id' })
+    try {
+      const { error: profileError } = await admin
+        .from('users')
+        .upsert(userData, { onConflict: 'id' })
 
-    if (profileError) {
-      console.error('Error creating user profile:', profileError)
-      console.error('Error details:', JSON.stringify(profileError, null, 2))
-      // Return the error to the client so we can debug it
+      if (profileError) {
+        console.error('Error creating user profile:', profileError)
+        // Return specific error message to client
+        return NextResponse.json({ 
+          error: 'Error al guardar el perfil: ' + profileError.message,
+          code: profileError.code 
+        }, { status: 500 })
+      }
+    } catch (dbError: any) {
+      console.error('Database exception:', dbError)
       return NextResponse.json({ 
-        error: 'Error al guardar el perfil de usuario: ' + profileError.message,
-        details: profileError 
+        error: 'Error de base de datos: ' + (dbError.message || 'Desconocido'),
+        exception: dbError.toString()
       }, { status: 500 })
     }
   }
