@@ -40,7 +40,7 @@ export async function POST(request: Request) {
     // Get existing user roles
     const { data: profile } = await adminClient.from('users').select('roles').eq('id', user.id).single()
     const currentRoles = profile?.roles || []
-    const newRole = { organization_id: invitation.organization_id, role: invitation.role }
+    const newRole = { organization_id: invitation.organization_id, role: invitation.role, status: 'active', is_primary: currentRoles.length === 0 }
 
     // Append new role to the array
     const updatedRoles = [...currentRoles.filter((r: { organization_id: string }) => r.organization_id !== invitation.organization_id), newRole]
