@@ -69,14 +69,10 @@ global.fetch = jest.fn(() =>
 ) as jest.Mock
 
 describe('Billing System Unit Tests', () => {
-  let testUserId: string
   let testOrgId: string
-  let testAccountId: string
 
   beforeAll(() => {
-    testUserId = 'test-user-id'
     testOrgId = 'test-org-id'
-    testAccountId = 'test-account-id'
   })
 
   describe('Account Creation Logic', () => {

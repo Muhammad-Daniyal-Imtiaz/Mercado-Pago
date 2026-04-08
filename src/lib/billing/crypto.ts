@@ -30,8 +30,8 @@ export interface EncryptedPaymentData {
  * Encrypts sensitive payment data while keeping non-sensitive data visible
  */
 export function encryptPaymentData(paymentData: PaymentData): EncryptedPaymentData {
-  const sensitiveData: any = {}
-  const publicData: any = {}
+  const sensitiveData: Record<string, string> = {}
+  const publicData: Record<string, string> = {}
 
   // Separate sensitive and non-sensitive data
   if (paymentData.cardNumber) {
@@ -103,7 +103,7 @@ export function decryptPaymentData(encryptedData: EncryptedPaymentData): Payment
     throw new Error('Invalid encrypted payment data format')
   }
 
-  const sensitiveData = JSON.parse(decrypt(encryptedData.encrypted_data))
+  const sensitiveData: PaymentData = JSON.parse(decrypt(encryptedData.encrypted_data))
   
   return {
     cardNumber: sensitiveData.cardNumber,
@@ -210,13 +210,13 @@ export function validateExpiryDate(month: string, year: string): boolean {
 /**
  * Masks sensitive data for logging
  */
-export function maskSensitiveData(data: any): any {
+export function maskSensitiveData(data: Record<string, unknown>): Record<string, unknown> {
   if (typeof data !== 'object' || data === null) return data
   
   const masked = { ...data }
   
   // Mask card numbers
-  if (masked.cardNumber) {
+  if (typeof masked.cardNumber === 'string') {
     masked.cardNumber = masked.cardNumber.slice(-4).padStart(masked.cardNumber.length, '*')
   }
   
@@ -226,12 +226,12 @@ export function maskSensitiveData(data: any): any {
   }
   
   // Mask bank account numbers
-  if (masked.bankAccountNumber) {
+  if (typeof masked.bankAccountNumber === 'string') {
     masked.bankAccountNumber = masked.bankAccountNumber.slice(-4).padStart(masked.bankAccountNumber.length, '*')
   }
   
   // Mask access tokens
-  if (masked.mercadoPagoAccessToken) {
+  if (typeof masked.mercadoPagoAccessToken === 'string') {
     masked.mercadoPagoAccessToken = masked.mercadoPagoAccessToken.slice(-8).padStart(masked.mercadoPagoAccessToken.length, '*')
   }
   

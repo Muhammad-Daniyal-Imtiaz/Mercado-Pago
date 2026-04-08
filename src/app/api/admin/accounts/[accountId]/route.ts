@@ -4,8 +4,9 @@ import { NextResponse } from 'next/server'
 
 export async function PUT(
   request: Request,
-  { params }: { params: { accountId: string } }
+  { params }: { params: Promise<{ accountId: string }> }
 ) {
+  const { accountId } = await params
   const supabase = await createClient()
   const adminClient = createAdminClient()
 
@@ -39,7 +40,6 @@ export async function PUT(
 
   // 2. Actualizar la cuenta
   const updates = await request.json()
-  const { accountId } = params
 
   // Si se cambia el plan, actualizar los límites
   if (updates.plan_type) {
@@ -66,7 +66,7 @@ export async function PUT(
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { accountId: string } }
+  { params }: { params: Promise<{ accountId: string }> }
 ) {
   const supabase = await createClient()
   const adminClient = createAdminClient()
@@ -76,6 +76,8 @@ export async function DELETE(
   if (authError || !user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
+
+  const { accountId } = await params
 
   const { data: profile } = await adminClient
     .from('users')
@@ -100,7 +102,6 @@ export async function DELETE(
   }
 
   // 2. Eliminar la cuenta (soft delete)
-  const { accountId } = params
   const { error: deleteError } = await adminClient
     .from('accounts')
     .update({ 

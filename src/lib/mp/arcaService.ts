@@ -16,8 +16,14 @@ import {
  */
 function loadCertificates(): { cert: string; key: string } | null {
   try {
+    // No cargar certificados durante el build
+    if (process.env.NEXT_PHASE === 'phase-production-build' || process.env.NEXT_PHASE === 'phase-development-build') {
+      console.log('[ARCA] Skipping certificate loading during build phase');
+      return null;
+    }
+    
     // En producción (Vercel), usar variables de entorno
-    if (process.env.NODE_ENV === 'production' || process.env.VERCEL_ENV) {
+    if (process.env.NODE_ENV === 'production' || process.env.VERCEL_ENV || process.env.NEXT_PUBLIC_VERCEL_ENV) {
       const crtBase64 = process.env.AFIP_PROD_CERTIFICATE_CRT || process.env.AFIP_CERTIFICATE_CRT;
       const keyBase64 = process.env.AFIP_PROD_PRIVATE_KEY || process.env.AFIP_PRIVATE_KEY;
       
@@ -35,6 +41,8 @@ function loadCertificates(): { cert: string; key: string } | null {
     // En desarrollo local, usar archivos físicos
     const certPath = path.join(process.cwd(), 'produccion_certificado.crt');
     const keyPath = path.join(process.cwd(), 'produccion_privada.key');
+    
+    console.log('[ARCA] Looking for certificates at:', { certPath, keyPath, cwd: process.cwd() });
     
     if (!fs.existsSync(certPath) || !fs.existsSync(keyPath)) {
       console.warn('[ARCA] Certificate files not found');

@@ -104,7 +104,7 @@ describe('Accounts API Unit Tests', () => {
       expect(Array.isArray(data.accounts)).toBe(true)
       expect(data.accounts.length).toBeGreaterThan(0)
       
-      const testAccount = data.accounts.find((acc: any) => acc.id === testAccountId)
+      const testAccount = data.accounts.find((acc: { id: string }) => acc.id === testAccountId)
       expect(testAccount).toBeTruthy()
       expect(testAccount.plan_type).toBe('basic')
       expect(testAccount.billing_status).toBe('trial')
@@ -115,7 +115,7 @@ describe('Accounts API Unit Tests', () => {
       const response = await GET(new Request('http://localhost:3000/api/admin/accounts'))
       const data = await response.json()
 
-      const testAccount = data.accounts.find((acc: any) => acc.id === testAccountId)
+      const testAccount = data.accounts.find((acc: { id: string }) => acc.id === testAccountId)
       expect(testAccount.account_admin).toBeTruthy()
       expect(testAccount.account_admin.email).toBe('test-admin@example.com')
     })
@@ -187,7 +187,7 @@ describe('Accounts API Unit Tests', () => {
       const response = await PUT(new Request(`http://localhost:3000/api/admin/accounts/${testAccountId}`, {
         method: 'PUT',
         body: JSON.stringify(updateData)
-      }), { params: { accountId: testAccountId } } as any)
+      }), { params: { accountId: testAccountId } } as { params: { accountId: string } })
       const data = await response.json()
 
       expect(response.status).toBe(200)
@@ -204,7 +204,7 @@ describe('Accounts API Unit Tests', () => {
       const response = await PUT(new Request(`http://localhost:3000/api/admin/accounts/${testAccountId}`, {
         method: 'PUT',
         body: JSON.stringify(updateData)
-      }), { params: { accountId: testAccountId } } as any)
+      }), { params: { accountId: testAccountId } } as { params: { accountId: string } })
       const data = await response.json()
 
       expect(response.status).toBe(200)
@@ -217,7 +217,7 @@ describe('Accounts API Unit Tests', () => {
       const { DELETE } = await import('@/app/api/admin/accounts/[accountId]/route')
       const response = await DELETE(new Request(`http://localhost:3000/api/admin/accounts/${testAccountId}`, {
         method: 'DELETE'
-      }), { params: { accountId: testAccountId } } as any)
+      }), { params: { accountId: testAccountId } } as { params: { accountId: string } })
       const data = await response.json()
 
       expect(response.status).toBe(200)
@@ -229,7 +229,7 @@ describe('Accounts API Unit Tests', () => {
   describe('GET /api/admin/accounts/[accountId]/usage', () => {
     test('should return usage statistics', async () => {
       const { GET } = await import('@/app/api/admin/accounts/[accountId]/usage/route')
-      const response = await GET(new Request(`http://localhost:3000/api/admin/accounts/${testAccountId}/usage`), { params: { accountId: testAccountId } } as any)
+      const response = await GET(new Request(`http://localhost:3000/api/admin/accounts/${testAccountId}/usage`), { params: { accountId: testAccountId } } as { params: { accountId: string } })
       const data = await response.json()
 
       expect(response.status).toBe(200)
@@ -244,7 +244,7 @@ describe('Accounts API Unit Tests', () => {
 
     test('should calculate usage percentages correctly', async () => {
       const { GET } = await import('@/app/api/admin/accounts/[accountId]/usage/route')
-      const response = await GET(new Request(`http://localhost:3000/api/admin/accounts/${testAccountId}/usage`), { params: { accountId: testAccountId } } as any)
+      const response = await GET(new Request(`http://localhost:3000/api/admin/accounts/${testAccountId}/usage`), { params: { accountId: testAccountId } } as { params: { accountId: string } })
       const data = await response.json()
 
       expect(data.stats.usage_percentage).toBeDefined()

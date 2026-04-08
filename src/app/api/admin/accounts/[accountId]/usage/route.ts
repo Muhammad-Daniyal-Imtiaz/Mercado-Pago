@@ -4,8 +4,9 @@ import { NextResponse } from 'next/server'
 
 export async function GET(
   request: Request,
-  { params }: { params: { accountId: string } }
+  { params }: { params: Promise<{ accountId: string }> }
 ) {
+  const { accountId } = await params
   const supabase = await createClient()
   const adminClient = createAdminClient()
 
@@ -38,7 +39,6 @@ export async function GET(
   }
 
   // 2. Obtener información de la cuenta y sus límites
-  const { accountId } = params
   const { data: account } = await adminClient
     .from('accounts')
     .select('plan_limits, usage_stats')
