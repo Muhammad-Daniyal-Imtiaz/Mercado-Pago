@@ -62,7 +62,7 @@ export async function GET(request: Request) {
             email: user.email,
             role: role,
             full_name: user.user_metadata?.full_name || user.email,
-            roles: [{ organization_id: null, role: role }] // Initial empty role list maybe? 
+            roles: JSON.stringify([{ organization_id: null, role: role }])
           }, { onConflict: 'id' })
 
         return NextResponse.redirect(`${baseUrl}/dashboard/${role}`)

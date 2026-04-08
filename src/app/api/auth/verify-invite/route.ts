@@ -1,5 +1,6 @@
 import { createClient } from '@/utils/supabase/server'
 import { createAdminClient } from '@/utils/supabase/admin'
+import { translateAuthError } from '@/lib/auth-errors'
 import { NextResponse } from 'next/server'
 
 export async function POST(request: Request) {
@@ -74,7 +75,10 @@ export async function POST(request: Request) {
   }
 
   if (authError) {
-    return NextResponse.json({ error: authError.message }, { status: 400 })
+    const errorMessage = 'message' in authError 
+      ? translateAuthError(authError.message) 
+      : 'Error de autenticación'
+    return NextResponse.json({ error: errorMessage }, { status: 400 })
   }
 
   // 4. Update Organization Members
