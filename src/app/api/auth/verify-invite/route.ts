@@ -1,5 +1,7 @@
 import { createClient } from '@/utils/supabase/server'
 import { createAdminClient } from '@/utils/supabase/admin'
+import { translateAuthError } from '@/lib/auth-errors'
+import { syncUserRoles } from '@/lib/role-sync'
 import { NextResponse } from 'next/server'
 
 export async function POST(request: Request) {
@@ -39,7 +41,7 @@ export async function POST(request: Request) {
     // Get existing user roles
     const { data: profile } = await adminClient.from('users').select('roles').eq('id', user.id).single()
     const currentRoles = profile?.roles || []
-    const newRole = { organization_id: invitation.organization_id, role: invitation.role }
+    const newRole = { organization_id: invitation.organization_id, role: invitation.role, status: 'active', is_primary: currentRoles.length === 0 }
 
     // Append new role to the array
     const updatedRoles = [...currentRoles.filter((r: { organization_id: string }) => r.organization_id !== invitation.organization_id), newRole]
@@ -48,8 +50,6 @@ export async function POST(request: Request) {
       .from('users')
       .update({
         roles: updatedRoles,
-        role: invitation.role,
-        organization_id: invitation.organization_id,
         full_name: fullName || user.user_metadata?.full_name
       })
       .eq('id', user.id)
@@ -74,7 +74,10 @@ export async function POST(request: Request) {
   }
 
   if (authError) {
-    return NextResponse.json({ error: authError.message }, { status: 400 })
+    const errorMessage = 'message' in authError 
+      ? translateAuthError(authError.message) 
+      : 'Error de autenticación'
+    return NextResponse.json({ error: errorMessage }, { status: 400 })
   }
 
   // 4. Update Organization Members
@@ -103,6 +106,16 @@ export async function POST(request: Request) {
 
   // 5. Delete invitation
   await adminClient.from('invitations').delete().eq('id', invitation.id)
+
+  // 6. Sync roles to ensure consistency
+  if (authData.user?.id) {
+    try {
+      await syncUserRoles(authData.user.id)
+    } catch (syncError) {
+      console.error('Error syncing roles after invitation:', syncError)
+      // Don't fail the request, but log the error
+    }
+  }
 
   return NextResponse.json({ 
     success: true, 

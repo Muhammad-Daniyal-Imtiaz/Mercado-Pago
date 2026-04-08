@@ -1,4 +1,5 @@
 import { createClient } from '@/utils/supabase/server'
+import { translateAuthError } from '@/lib/auth-errors'
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 
@@ -32,7 +33,7 @@ export async function GET(request: Request) {
   })
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 400 })
+    return NextResponse.json({ error: translateAuthError(error.message) }, { status: 400 })
   }
 
   return NextResponse.redirect(data.url)

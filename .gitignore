@@ -43,3 +43,10 @@ next-env.d.ts
 
 # dev tools
 .dev-tools
+
+# ARCA / AFIP Certificates
+*.crt
+*.key
+*.csr
+log.txt
+ticket-*

@@ -11,10 +11,10 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  // Fetch ONLY organizations created by the current user
+  // Fetch organizations created by the current user with members
   const { data, error } = await adminClient
     .from('organizations')
-    .select('id, name')
+    .select('id, name, members')
     .eq('created_by', user.id)
 
   if (error) {

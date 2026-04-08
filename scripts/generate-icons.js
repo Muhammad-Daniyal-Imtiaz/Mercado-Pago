@@ -19,8 +19,6 @@ async function generateIcons() {
         .resize(size, size)
         .png()
         .toFile(path.join(outputDir, `icon-${size}x${size}.png`));
-      
-      console.log(`Generated icon-${size}x${size}.png`);
     }
 
     // Generar OG image
@@ -29,8 +27,6 @@ async function generateIcons() {
       .png()
       .toFile(path.join(outputDir, 'og-image.png'));
     
-    console.log('Generated og-image.png');
-
     // Generar screenshots de ejemplo
     const desktopIcon = await sharp(inputSvg).resize(200, 200).png().toBuffer();
     await sharp({
@@ -48,8 +44,6 @@ async function generateIcons() {
     .png()
     .toFile(path.join(outputDir, 'screenshot-desktop.png'));
     
-    console.log('Generated screenshot-desktop.png');
-
     const mobileIcon = await sharp(inputSvg).resize(100, 100).png().toBuffer();
     await sharp({
       create: {
@@ -66,9 +60,6 @@ async function generateIcons() {
     .png()
     .toFile(path.join(outputDir, 'screenshot-mobile.png'));
     
-    console.log('Generated screenshot-mobile.png');
-
-    console.log('All icons generated successfully!');
   } catch (error) {
     console.error('Error generating icons:', error);
   }

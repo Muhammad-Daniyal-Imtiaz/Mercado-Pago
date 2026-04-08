@@ -4,6 +4,29 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
+interface OrgMetadata {
+  logo?: string
+  color?: string
+}
+
+function parseMetadata(metadata: string | null | undefined): OrgMetadata {
+  if (!metadata) return {}
+  try {
+    return JSON.parse(metadata)
+  } catch {
+    return {}
+  }
+}
+
+function getOrgInitials(name: string): string {
+  return name
+    .split(' ')
+    .map(n => n.charAt(0))
+    .join('')
+    .toUpperCase()
+    .slice(0, 2)
+}
+
 export function Header({ onMenuClick }: { onMenuClick?: () => void }) {
   const router = useRouter()
   const [user, setUser] = useState<any>(null)
@@ -81,28 +104,48 @@ export function Header({ onMenuClick }: { onMenuClick?: () => void }) {
           {user && user.organization && (
             <div className="hidden md:flex items-center relative gap-4">
               <div className="h-6 w-px bg-zinc-200 dark:bg-zinc-800 mx-1" />
-
               <div className="relative">
                 <button
                   onClick={() => user.memberships?.length > 1 && setShowOrgDropdown(!showOrgDropdown)}
-                  className={`flex flex-col text-left group transition-all ${user.memberships?.length > 1 ? 'cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-800 p-2 rounded-xl' : 'pointer-events-none'}`}
+                  className={`flex items-center gap-3 text-left group transition-all ${user.memberships?.length > 1 ? 'cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-800 p-2 rounded-xl' : 'pointer-events-none'}`}
                 >
-                  <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400 opacity-60">Portal</span>
-                    {user.memberships?.length > 1 && (
-                      <span className="text-[8px] bg-blue-600 text-white px-1.5 py-0.5 rounded font-black uppercase tracking-tighter">
-                        {user.memberships.length}
-                      </span>
-                    )}
+                  {/* Logo de la organización */}
+                  {(() => {
+                    const metadata = parseMetadata(user.organization?.metadata)
+                    if (metadata.logo) {
+                      return (
+                        <img
+                          src={metadata.logo}
+                          alt={user.organization.name}
+                          className="w-8 h-8 rounded-lg object-cover ring-2 ring-zinc-200 dark:ring-zinc-700"
+                        />
+                      )
+                    }
+                    return (
+                      <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-xs font-black ring-2 ring-zinc-200 dark:ring-zinc-700">
+                        {getOrgInitials(user.organization.name)}
+                      </div>
+                    )
+                  })()}
+                  
+                  <div className="flex flex-col">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400 opacity-60">Portal</span>
+                      {user.memberships?.length > 1 && (
+                        <span className="text-[8px] bg-blue-600 text-white px-1.5 py-0.5 rounded font-black uppercase tracking-tighter">
+                          {user.memberships.length}
+                        </span>
+                      )}
+                    </div>
+                    <span className="text-sm font-black text-zinc-900 dark:text-white uppercase tracking-tighter italic flex items-center gap-1.5">
+                      {user.organization.name}
+                      {user.memberships?.length > 1 && (
+                        <svg className={`w-3 h-3 transition-transform ${showOrgDropdown ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M19 9l-7 7-7-7" />
+                        </svg>
+                      )}
+                    </span>
                   </div>
-                  <span className="text-sm font-black text-zinc-900 dark:text-white uppercase tracking-tighter italic flex items-center gap-1.5">
-                    {user.organization.name}
-                    {user.memberships?.length > 1 && (
-                      <svg className={`w-3 h-3 transition-transform ${showOrgDropdown ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M19 9l-7 7-7-7" />
-                      </svg>
-                    )}
-                  </span>
                 </button>
 
                 {/* Organization Switcher Dropdown */}
@@ -110,22 +153,44 @@ export function Header({ onMenuClick }: { onMenuClick?: () => void }) {
                   <div className="absolute top-full left-0 mt-2 w-72 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-2xl p-2 z-[60] animate-in slide-in-from-top-2">
                     <p className="px-3 pt-2 pb-4 text-[10px] font-black uppercase tracking-widest text-zinc-400 border-b border-zinc-100 dark:border-zinc-800 mb-2">Cambiar de equipo</p>
                     <div className="space-y-1">
-                      {user.memberships.map((m: any) => (
+                      {user.memberships
+                        .filter((m: any) => m.name && m.name !== 'Equipo no asignado')
+                        .map((m: any) => (
                         <button
                           key={m.organization_id}
                           onClick={() => handleSwitchOrg(m.organization_id)}
                           disabled={switching}
-                          className={`w-full text-left p-3 rounded-xl transition-all flex items-center justify-between group ${m.organization_id === user.organization?.organization_id
+                          className={`w-full text-left p-3 rounded-xl transition-all flex items-center gap-3 group ${m.organization_id === user.organization?.organization_id
                               ? 'bg-zinc-100 dark:bg-zinc-800 cursor-default'
                               : 'hover:bg-zinc-50 dark:hover:bg-zinc-800/50'
                             }`}
                         >
-                          <div className="flex flex-col">
-                            <span className="font-black text-xs uppercase tracking-tight text-zinc-900 dark:text-white">{m.name}</span>
+                          {/* Logo on dropdown */}
+                          {(() => {
+                            const metadata = parseMetadata(m.metadata)
+                            if (metadata.logo) {
+                              return (
+                                <img
+                                  src={metadata.logo}
+                                  alt={m.name}
+                                  className="w-8 h-8 rounded-lg object-cover ring-2 ring-zinc-200 dark:ring-zinc-700 shrink-0"
+                                />
+                              )
+                            }
+                            return (
+                              
+                                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-zinc-400 to-zinc-600 flex items-center justify-center text-white text-xs font-black ring-2 ring-zinc-200 dark:ring-zinc-700 shrink-0">
+                                  {getOrgInitials(m.name)}
+                                </div>
+                              
+                            )
+                          })()}
+                          <div className="flex flex-col min-w-0">
+                            <span className="font-black text-xs uppercase tracking-tight text-zinc-900 dark:text-white truncate">{m.name}</span>
                             <span className="text-[10px] font-medium text-zinc-500 italic">{m.role.replace('_', ' ')}</span>
                           </div>
                           {m.organization_id === user.organization?.organization_id && (
-                            <div className="w-1.5 h-1.5 bg-green-500 rounded-full shadow-[0_0_8px_rgba(34,197,94,0.6)]"></div>
+                            <div className="w-1.5 h-1.5 bg-green-500 rounded-full shadow-[0_0_8px_rgba(34,197,94,0.6)] ml-auto shrink-0"></div>
                           )}
                         </button>
                       ))}

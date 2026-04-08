@@ -1,4 +1,6 @@
 import { createClient } from '@/utils/supabase/server'
+import { createAdminClient } from '@/utils/supabase/admin'
+import { translateAuthError } from '@/lib/auth-errors'
 import { NextResponse } from 'next/server'
 
 export async function POST(request: Request) {
@@ -8,7 +10,7 @@ export async function POST(request: Request) {
 
   // For security, usually we'd restrict who can sign up as sysadmin,
   // but for this implementation we'll allow it if explicitly requested.
-  
+
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
@@ -21,7 +23,59 @@ export async function POST(request: Request) {
   })
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 400 })
+    return NextResponse.json({ error: translateAuthError(error.message) }, { status: 400 })
+  }
+
+  // Create user profile in the database immediately
+  if (data.user) {
+    const admin = createAdminClient()
+    
+    // Prepare user data matching the actual table structure
+    const now = new Date().toISOString()
+    const userData = {
+      id: data.user.id,
+      email: data.user.email,
+      full_name: full_name || data.user.email,
+      username: null,
+      avatar_url: null,
+      phone: null,
+      account_id: null,
+      invitation_token: null,
+      invitation_expires_at: null,
+      invited_by: null,
+      is_active: true,
+      is_verified: false,
+      email_confirmed_at: null,
+      notification_preferences: { sms: false, push: true, email: true, digest: 'instant' },
+      alert_channels: { low: ['email'], high: ['email', 'push'], medium: ['email'], critical: ['email', 'push', 'sms'] },
+      last_login_at: null,
+      last_active_at: null,
+      metadata: {},
+      created_at: now,
+      updated_at: now,
+      roles: [{ organization_id: null, role: role, status: 'active', is_primary: true }]
+    }
+    
+    try {
+      const { error: profileError } = await admin
+        .from('users')
+        .upsert(userData, { onConflict: 'id' })
+
+      if (profileError) {
+        console.error('Error creating user profile:', profileError)
+        // Return specific error message to client
+        return NextResponse.json({ 
+          error: 'Error al guardar el perfil: ' + profileError.message,
+          code: profileError.code 
+        }, { status: 500 })
+      }
+    } catch (dbError: any) {
+      console.error('Database exception:', dbError)
+      return NextResponse.json({ 
+        error: 'Error de base de datos: ' + (dbError.message || 'Desconocido'),
+        exception: dbError.toString()
+      }, { status: 500 })
+    }
   }
 
   return NextResponse.json({ user: data.user })

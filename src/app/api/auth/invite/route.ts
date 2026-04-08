@@ -14,12 +14,11 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  // 2. Get current user's role and account_id - use ADMIN client to bypass RLS
+  // 2. Get current user's roles - use ADMIN client to bypass RLS
   const adminClient = createAdminClient()
   const { data: userData, error: userError } = await adminClient
     .from('users')
-    .select('role, organization_id, full_name, email')
-
+    .select('roles, full_name, email')
     .eq('id', user.id)
     .single()
 
@@ -31,24 +30,74 @@ export async function POST(request: Request) {
     }, { status: 404 })
   }
 
+  // Parse roles
+  let userRoles: Array<{
+    organization_id: string
+    role: string
+    status?: string
+    is_primary?: boolean
+  }> = []
+  try {
+    userRoles = typeof userData.roles === 'string' ? JSON.parse(userData.roles) : (userData.roles || [])
+  } catch {
+    userRoles = []
+  }
 
-  if (userData.role !== 'account_admin' && userData.role !== 'sysadmin') {
+  // Find role for target organization
+  const userOrgRole = userRoles.find((r: { organization_id: string }) => r.organization_id === organization_id)
+  const isSysadmin = userRoles.some((r: { role: string }) => r.role === 'sysadmin')
+
+  // Check permissions
+  if (!isSysadmin && userOrgRole?.role !== 'account_admin') {
     return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 })
   }
 
   // IDOR PROTECTION: Check if they are part of the TARGET organization (sysadmins can bypass)
-  if (userData.role !== 'sysadmin') {
-    if (!userData.organization_id || userData.organization_id !== organization_id) {
-       return NextResponse.json({ error: 'You can only invite members to your current active organization.' }, { status: 403 })
+  if (!isSysadmin && !userOrgRole) {
+    return NextResponse.json({ error: 'You can only invite members to organizations you belong to.' }, { status: 403 })
+  }
+
+  // 5. Check invitation limits for account_admin (sysadmins bypass)
+  if (!isSysadmin && userOrgRole?.role === 'account_admin') {
+    // Get account information to check plan limits
+    const { data: account } = await adminClient
+      .from('accounts')
+      .select('plan_limits, usage_stats')
+      .eq('account_admin_id', organization_id)
+      .single()
+
+    if (account?.plan_limits) {
+      const planLimits = typeof account.plan_limits === 'string' 
+        ? JSON.parse(account.plan_limits) 
+        : account.plan_limits
+
+      const maxInvitations = planLimits.max_invitations || 5
+      
+      // Count existing invitations for this organization
+      const { data: existingInvites } = await adminClient
+        .from('invitations')
+        .select('id')
+        .eq('organization_id', organization_id)
+        .eq('status', 'pending')
+
+      const currentInvitations = existingInvites?.length || 0
+
+      if (currentInvitations >= maxInvitations) {
+        return NextResponse.json({ 
+          error: `Has alcanzado el límite de ${maxInvitations} invitaciones para tu plan actual. Actualiza tu plan para enviar más invitaciones.`,
+          limit_reached: true,
+          current: currentInvitations,
+          max: maxInvitations
+        }, { status: 429 })
+      }
     }
   }
 
-
-  // 3. Generate 6-digit OTP
+  // 6. Generate 6-digit OTP
   const otp = Math.floor(100000 + Math.random() * 900000).toString()
   const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours expiry
 
-  // 4. Force Cleanup previous and Store invitation in DB - use ADMIN client
+  // 7. Force Cleanup previous and Store invitation in DB - use ADMIN client
   await adminClient.from('invitations').delete().eq('email', email)
   const { error: inviteError } = await adminClient
     .from('invitations')
@@ -68,7 +117,7 @@ export async function POST(request: Request) {
 
 
 
-  // 5. Send Email via NodeMailer (helper in lib/email.ts)
+  // 8. Send Email via NodeMailer (helper in lib/email.ts)
   try {
     await sendInvitationEmail({
       to: email,

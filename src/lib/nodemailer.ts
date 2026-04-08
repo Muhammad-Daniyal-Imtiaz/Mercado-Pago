@@ -1,7 +1,5 @@
 import nodemailer from 'nodemailer';
 
-console.log('Using Email User:', process.env.EMAIL_USER); // Log the user to double check
-
 export const transporter = nodemailer.createTransport({
   host: 'smtp.gmail.com',
   port: 465,
@@ -12,13 +10,10 @@ export const transporter = nodemailer.createTransport({
   },
 });
 
-
-
-
 export const sendEmail = async ({ to, subject, html }: { to: string; subject: string; html: string }) => {
   const mailOptions = {
-    from: process.env.SMTP_FROM || `AlertApp <${process.env.EMAIL_USER}>`,
-
+    from: process.env.SMTP_FROM || `Pay-Alert <${process.env.EMAIL_USER}>`,
+    replyTo: 'guillermoandrada@gmail.com',
     to,
     subject,
     html,
@@ -26,10 +21,8 @@ export const sendEmail = async ({ to, subject, html }: { to: string; subject: st
 
   try {
     const info = await transporter.sendMail(mailOptions);
-    console.log('Message sent: %s', info.messageId);
     return info;
   } catch (error) {
-    console.error('Error sending email:', error);
-    throw error;
+    throw new Error('Error sending email', { cause: error });
   }
 };

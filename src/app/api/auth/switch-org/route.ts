@@ -12,28 +12,53 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  // 1. Verify user actually has a membership in this organization
+  // 1. Get current roles
   const { data: profile } = await adminClient
     .from('users')
     .select('roles')
     .eq('id', user.id)
     .single()
 
-  const userRoles = profile?.roles || []
-  const targetRole = userRoles.find((r: { organization_id: string }) => r.organization_id === organization_id)
+  if (!profile) {
+    return NextResponse.json({ error: 'User not found' }, { status: 404 })
+  }
 
+  let userRoles: Array<{
+    organization_id: string
+    role: string
+    status?: string
+    is_primary?: boolean
+  }> = []
+  
+  try {
+    userRoles = typeof profile.roles === 'string' 
+      ? JSON.parse(profile.roles) 
+      : (profile.roles || [])
+  } catch (err) {
+    userRoles = []
+  }
+
+  // 2. Verify user has membership in target organization
+  const targetRole = userRoles.find(r => r.organization_id === organization_id && r.status !== 'removed')
+  
   if (!targetRole) {
     return NextResponse.json({ error: 'You are not a member of this organization' }, { status: 403 })
   }
 
-  // 2. Update the profile row's current state to "switch" the dashboard context
+  // 3. Update is_primary flag: set target org to true, all others to false
+  const updatedRoles = userRoles.map(r => ({
+    ...r,
+    is_primary: r.organization_id === organization_id
+  }))
+
   await adminClient
     .from('users')
-    .update({ 
-      organization_id: organization_id,
-      role: targetRole.role 
-    })
+    .update({ roles: updatedRoles })
     .eq('id', user.id)
 
-  return NextResponse.json({ success: true, role: targetRole.role })
+  return NextResponse.json({ 
+    success: true, 
+    role: targetRole.role,
+    organization_id: organization_id
+  })
 }

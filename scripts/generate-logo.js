@@ -14,8 +14,6 @@ async function generateLogo() {
       .png()
       .toFile(outputPath);
     
-    console.log('Logo generated: /assets/logo.png (80x80px)');
-    
   } catch (error) {
     console.error('Error generating logo:', error);
   }
