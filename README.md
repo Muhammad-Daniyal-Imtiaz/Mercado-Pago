@@ -83,10 +83,23 @@ npm run dev
    - Copy your Access Token and Webhook Secret
 
 2. **Set up environment variables:**
+   Create a `.env.local` file with the following variables:
    ```env
-   MERCADO_PAGO_ACCESS_TOKEN=your_access_token_here
-   MERCADO_PAGO_WEBHOOK_SECRET=your_webhook_secret_here
+   # Supabase
+   NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+   SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+
+   # Encryption (Required for MP credential storage)
+   # Generate with: openssl rand -hex 32
+   MASTER_ENCRYPTION_KEY=your_64_char_hex_key_here
+
+   # Mercado Pago (Optional - can be configured per-organization via UI)
+   MP_ACCESS_TOKEN=your_mp_access_token_here
+
+   # NextAuth
    NEXTAUTH_SECRET=your_nextauth_secret_here
+   NEXTAUTH_URL=http://localhost:3000
    ```
 
 3. **Start monitoring:**

@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { getNameFromAfip } from './arcaService';
+import { getOrganizationMPCredentials, getCurrentUserOrganizationMPCredentials } from './credentials';
 
 const MP_ACCESS_TOKEN = process.env.MP_ACCESS_TOKEN ?? '';
 const MP_API_BASE     = 'https://api.mercadopago.com/v1';
@@ -108,13 +109,22 @@ export async function getPayerInfo(p: MPPayment): Promise<MPPayerInfo> {
 /**
  * Returns the last N payments from the account (descending by date).
  * @param limit Number of results to fetch.
+ * @param accessToken Optional access token (uses env fallback if not provided).
  * @returns Array of MPPayment objects.
  */
-export async function getRecentPayments(limit = 10): Promise<MPPayment[]> {
+export async function getRecentPayments(
+  limit = 10,
+  accessToken = MP_ACCESS_TOKEN
+): Promise<MPPayment[]> {
+  const token = accessToken || MP_ACCESS_TOKEN;
+  if (!token) {
+    throw new Error('MP_ACCESS_TOKEN is required');
+  }
+
   const response = await axios.get<{ results: MPPayment[] }>(
     `${MP_API_BASE}/payments/search`,
     {
-      headers: { Authorization: `Bearer ${MP_ACCESS_TOKEN}` },
+      headers: { Authorization: `Bearer ${token}` },
       params:  { sort: 'date_created', criteria: 'desc', limit },
     }
   );
@@ -122,18 +132,44 @@ export async function getRecentPayments(limit = 10): Promise<MPPayment[]> {
 }
 
 /**
+ * Get recent payments using organization credentials from database.
+ * @param organizationId Organization ID to fetch credentials for.
+ * @param limit Number of results to fetch.
+ * @returns Array of MPPayment objects.
+ */
+export async function getRecentPaymentsForOrganization(
+  organizationId: string,
+  limit = 10
+): Promise<MPPayment[]> {
+  const creds = await getOrganizationMPCredentials(organizationId);
+  if (!creds) {
+    throw new Error('No MP credentials configured for this organization');
+  }
+  return getRecentPayments(limit, creds.accessToken);
+}
+
+/**
  * Returns full details for a specific payment, with payer info enriched by ARCA.
  * @param paymentId The unique payment ID.
+ * @param accessToken Optional access token (uses env fallback if not provided).
  * @returns Details including payer info and net amount.
  */
-export async function getPaymentById(paymentId: string | number): Promise<{
+export async function getPaymentById(
+  paymentId: string | number,
+  accessToken = MP_ACCESS_TOKEN
+): Promise<{
   payment: MPPayment;
   payer:   MPPayerInfo;
   netAmount: number;
 } | null> {
+  const token = accessToken || MP_ACCESS_TOKEN;
+  if (!token) {
+    throw new Error('MP_ACCESS_TOKEN is required');
+  }
+
   const response = await axios.get<MPPayment>(
     `${MP_API_BASE}/payments/${paymentId}`,
-    { headers: { Authorization: `Bearer ${MP_ACCESS_TOKEN}` } }
+    { headers: { Authorization: `Bearer ${token}` } }
   );
 
   const p         = response.data;
@@ -144,17 +180,40 @@ export async function getPaymentById(paymentId: string | number): Promise<{
 }
 
 /**
+ * Get payment details using organization credentials from database.
+ * @param paymentId The unique payment ID.
+ * @param organizationId Organization ID to fetch credentials for.
+ * @returns Details including payer info and net amount.
+ */
+export async function getPaymentByIdForOrganization(
+  paymentId: string | number,
+  organizationId: string
+): Promise<{
+  payment: MPPayment;
+  payer:   MPPayerInfo;
+  netAmount: number;
+} | null> {
+  const creds = await getOrganizationMPCredentials(organizationId);
+  if (!creds) {
+    throw new Error('No MP credentials configured for this organization');
+  }
+  return getPaymentById(paymentId, creds.accessToken);
+}
+
+/**
  * Fetches all new payments since the last processed ID, enriches them,
  * and returns them as notification objects.
  * @param lastProcessedId The ID of the last processed payment.
  * @param limit Max search limit.
+ * @param accessToken Optional access token (uses env fallback if not provided).
  * @returns New notifications and the updated latest ID.
  */
 export async function fetchNewNotifications(
   lastProcessedId: number | null,
-  limit = 5
+  limit = 5,
+  accessToken = MP_ACCESS_TOKEN
 ): Promise<{ notifications: MPNotification[]; latestId: number | null }> {
-  const payments = await getRecentPayments(limit);
+  const payments = await getRecentPayments(limit, accessToken);
 
   if (!payments.length) return { notifications: [], latestId: lastProcessedId };
 
@@ -200,4 +259,23 @@ export async function fetchNewNotifications(
     notifications,
     latestId: payments[0].id,
   };
+}
+
+/**
+ * Fetches new notifications using organization credentials from database.
+ * @param lastProcessedId The ID of the last processed payment.
+ * @param organizationId Organization ID to fetch credentials for.
+ * @param limit Max search limit.
+ * @returns New notifications and the updated latest ID.
+ */
+export async function fetchNewNotificationsForOrganization(
+  lastProcessedId: number | null,
+  organizationId: string,
+  limit = 5
+): Promise<{ notifications: MPNotification[]; latestId: number | null }> {
+  const creds = await getOrganizationMPCredentials(organizationId);
+  if (!creds) {
+    throw new Error('No MP credentials configured for this organization');
+  }
+  return fetchNewNotifications(lastProcessedId, limit, creds.accessToken);
 }

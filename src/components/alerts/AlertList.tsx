@@ -27,7 +27,7 @@ export function AlertList({ limit }: AlertListProps) {
       .catch(() => setLoading(false))
   }, [limit])
 
-  if (loading) return <div>Cargando las alertas...</div>
+  if (loading) return (<div className="p-4">Cargando las alertas...</div>)
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
