@@ -58,10 +58,10 @@ export async function getCurrentUserOrganizationMPCredentials(
 ): Promise<{ credentials: MPCredentials | null; organizationId: string | null }> {
   const adminClient = createAdminClient()
 
-  // Get user's primary organization
+  // Get user's roles
   const { data: user, error: userError } = await adminClient
     .from('users')
-    .select('primary_organization_id, roles')
+    .select('roles')
     .eq('id', userId)
     .single()
 
@@ -70,15 +70,15 @@ export async function getCurrentUserOrganizationMPCredentials(
     return { credentials: null, organizationId: null }
   }
 
-  // Find active organization
-  let organizationId = user.primary_organization_id
+  // Find active organization from roles
+  let organizationId: string | null = null
   
-  if (!organizationId && user.roles) {
+  if (user.roles) {
     const roles = typeof user.roles === 'string' 
       ? JSON.parse(user.roles) 
       : user.roles
     
-    const activeRole = roles.find((r: { status: string }) => r.status === 'active')
+    const activeRole = roles.find((r: { status: string; organization_id: string }) => r.status === 'active')
     if (activeRole) {
       organizationId = activeRole.organization_id
     }

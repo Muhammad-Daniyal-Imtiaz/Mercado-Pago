@@ -14,10 +14,10 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  // 2. Get user's profile with roles and primary organization
+  // 2. Get user's profile with roles
   const { data: userData, error: userError } = await adminClient
     .from('users')
-    .select('roles, primary_organization_id')
+    .select('roles')
     .eq('id', user.id)
     .single()
 
@@ -44,16 +44,12 @@ export async function GET(request: Request) {
     userRoles = []
   }
 
-  // Get current organization (primary or first active)
-  const primaryOrgId = userData.primary_organization_id
-  const currentOrgRole = userRoles.find(r => r.organization_id === primaryOrgId && r.status === 'active')
-    || userRoles.find(r => r.status === 'active')
+  // Get current organization (first active role - not removed)
+  const currentOrgRole = userRoles.find(r => r.status !== 'removed')
 
   if (!currentOrgRole) {
     return NextResponse.json({ error: 'No active organization found' }, { status: 400 })
   }
-
-  const organizationId = currentOrgRole.organization_id
 
   // 3. Check permissions (only account_admin or sysadmin can manage credentials)
   const isSysadmin = userRoles.some(r => r.role === 'sysadmin')
@@ -61,6 +57,25 @@ export async function GET(request: Request) {
 
   if (!isAdmin) {
     return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 })
+  }
+
+  let organizationId = currentOrgRole.organization_id
+
+  // TODO: Remove this fallback - only account_admin should manage credentials
+  // Sysadmin fallback: if no org assigned, use first available organization
+  if (!organizationId && isSysadmin) {
+    const { data: firstOrg } = await adminClient
+      .from('organizations')
+      .select('id')
+      .limit(1)
+      .single()
+    if (firstOrg) {
+      organizationId = firstOrg.id
+    }
+  }
+
+  if (!organizationId) {
+    return NextResponse.json({ error: 'No organization available' }, { status: 400 })
   }
 
   // 4. Get organization and check for MP credentials
@@ -112,7 +127,7 @@ export async function POST(request: Request) {
   // 2. Get user's profile with roles
   const { data: userData, error: userError } = await adminClient
     .from('users')
-    .select('roles, primary_organization_id')
+    .select('roles')
     .eq('id', user.id)
     .single()
 
@@ -134,16 +149,12 @@ export async function POST(request: Request) {
     userRoles = []
   }
 
-  // Get current organization
-  const primaryOrgId = userData.primary_organization_id
-  const currentOrgRole = userRoles.find(r => r.organization_id === primaryOrgId && r.status === 'active')
-    || userRoles.find(r => r.status === 'active')
+  // Get current organization (first active role - not removed)
+  const currentOrgRole = userRoles.find(r => r.status !== 'removed')
 
   if (!currentOrgRole) {
     return NextResponse.json({ error: 'No active organization found' }, { status: 400 })
   }
-
-  const organizationId = currentOrgRole.organization_id
 
   // 3. Check permissions
   const isSysadmin = userRoles.some(r => r.role === 'sysadmin')
@@ -151,6 +162,25 @@ export async function POST(request: Request) {
 
   if (!isAdmin) {
     return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 })
+  }
+
+  let organizationId = currentOrgRole.organization_id
+
+  // TODO: Remove this fallback - only account_admin should manage credentials
+  // Sysadmin fallback: if no org assigned, use first available organization
+  if (!organizationId && isSysadmin) {
+    const { data: firstOrg } = await adminClient
+      .from('organizations')
+      .select('id')
+      .limit(1)
+      .single()
+    if (firstOrg) {
+      organizationId = firstOrg.id
+    }
+  }
+
+  if (!organizationId) {
+    return NextResponse.json({ error: 'No organization available' }, { status: 400 })
   }
 
   // 4. Encrypt the access token before saving
