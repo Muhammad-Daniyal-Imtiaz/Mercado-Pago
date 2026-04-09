@@ -6,43 +6,65 @@ import { CreditCard, Eye, EyeOff, Save, CheckCircle, AlertCircle } from 'lucide-
 export function MPCredentialsForm() {
   const [accessToken, setAccessToken] = useState('')
   const [showToken, setShowToken] = useState(false)
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [hasCredentials, setHasCredentials] = useState(false)
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
+  const [isEditing, setIsEditing] = useState(false)
+  const [organizationId, setOrganizationId] = useState<string | null>(null)
+  const [organizationName, setOrganizationName] = useState<string | null>(null)
+  const [availableOrgs, setAvailableOrgs] = useState<{id: string, name: string}[]>([])
 
   // Cargar estado actual al montar
   useEffect(() => {
     fetchCredentials()
   }, [])
 
-  const fetchCredentials = async () => {
-    setLoading(true)
+  const fetchCredentials = async (showLoading = true, targetOrgId: string | null = null) => {
+    if (showLoading) setLoading(true)
     try {
-      const res = await fetch('/api/organizations/credentials')
+      const url = targetOrgId 
+        ? `/api/organizations/credentials?organizationId=${targetOrgId}`
+        : '/api/organizations/credentials'
+        
+      const res = await fetch(url, { cache: 'no-store' })
       const data = await res.json()
       
       if (res.ok) {
         setHasCredentials(data.hasCredentials)
-        // Si tiene credenciales, mostrar placeholder
-        if (data.hasCredentials) {
+        setOrganizationId(data.organizationId)
+        setOrganizationName(data.organizationName)
+        if (data.availableOrgs) setAvailableOrgs(data.availableOrgs)
+        
+        if (data.accessToken) {
+          setAccessToken(data.accessToken)
+        } else if (data.hasCredentials) {
           setAccessToken('••••••••••••••••••••••••')
+        } else {
+          setAccessToken('')
         }
+      } else {
+        if (data.availableOrgs) setAvailableOrgs(data.availableOrgs)
+        setError(data.error)
       }
     } catch (err) {
       console.error('Error fetching credentials:', err)
     } finally {
-      setLoading(false)
+      if (showLoading) setLoading(false)
     }
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
-    // No enviar si es el placeholder enmascarado
-    if (accessToken === '••••••••••••••••••••••••') {
-      setError('Por favor ingresa un nuevo token o cancela')
+    if (!accessToken || accessToken === '••••••••••••••••••••••••') {
+      setError('Por favor ingresa un nuevo token válido')
+      return
+    }
+
+    if (!organizationId) {
+      setError('No hay una organización seleccionada. Intenta refrescar la página.')
       return
     }
 
@@ -51,21 +73,38 @@ export function MPCredentialsForm() {
     setError('')
 
     try {
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 15000)
+
       const res = await fetch('/api/organizations/credentials', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ accessToken }),
+        body: JSON.stringify({ accessToken, organizationId }),
+        signal: controller.signal
       })
 
+      clearTimeout(timeoutId)
       const data = await res.json()
-      
-      if (!res.ok) throw new Error(data.error || 'Error al guardar las credenciales')
 
-      setMessage('Credenciales guardadas exitosamente')
+      if (!res.ok) {
+        throw new Error(data.error || data.details || 'Error del servidor')
+      }
+
+      setMessage('¡Credenciales actualizadas correctamente!')
       setHasCredentials(true)
-      setAccessToken('••••••••••••••••••••••••')
+      setIsEditing(false)
+      setShowToken(false)
+      
+      // Refresh in background to sync everything
+      setTimeout(() => fetchCredentials(false, organizationId), 1000)
+      
     } catch (err: any) {
-      setError(err.message)
+      console.error('Submit Error:', err)
+      if (err.name === 'AbortError') {
+        setError('La solicitud tardó demasiado. Por favor verifica tu conexión.')
+      } else {
+        setError(err.message || 'Error inesperado al guardar')
+      }
     } finally {
       setSaving(false)
     }
@@ -74,6 +113,7 @@ export function MPCredentialsForm() {
   const handleEdit = () => {
     setAccessToken('')
     setShowToken(true)
+    setIsEditing(true)
   }
 
   return (
@@ -86,9 +126,19 @@ export function MPCredentialsForm() {
           <h2 className="text-xl sm:text-2xl font-black text-zinc-900 dark:text-white uppercase tracking-tight">
             Mercado Pago
           </h2>
-          <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">
-            Configuración de integración
-          </p>
+          <div className="flex items-center gap-2">
+            <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">
+              Configuración de integración
+            </p>
+            {organizationName && (
+              <>
+                <span className="text-zinc-300 dark:text-zinc-700 mx-1">•</span>
+                <p className="text-xs font-bold text-blue-600 dark:text-blue-400">
+                  {organizationName}
+                </p>
+              </>
+            )}
+          </div>
         </div>
       </div>
 
@@ -98,7 +148,6 @@ export function MPCredentialsForm() {
         </div>
       ) : (
         <form onSubmit={handleSubmit} className="space-y-5">
-          {/* Estado de conexión */}
           <div className={`flex items-center gap-2 p-3 rounded-xl text-xs font-bold uppercase tracking-wider ${
             hasCredentials 
               ? 'bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-400' 
@@ -117,7 +166,31 @@ export function MPCredentialsForm() {
             )}
           </div>
 
-          {/* Campo del token */}
+          {availableOrgs.length > 1 && (
+            <div className="p-4 bg-zinc-50 dark:bg-zinc-950 rounded-2xl border-2 border-zinc-100 dark:border-zinc-800">
+              <label className="block text-[10px] font-black uppercase tracking-widest text-zinc-500 dark:text-zinc-400 mb-2">
+                Seleccionar Equipo / Organización
+              </label>
+              <select
+                value={organizationId || ''}
+                onChange={(e) => {
+                  const newId = e.target.value
+                  setMessage('')
+                  setError('')
+                  setIsEditing(false)
+                  fetchCredentials(true, newId)
+                }}
+                className="w-full bg-white dark:bg-zinc-900 px-4 py-3 rounded-xl border-2 border-zinc-100 dark:border-zinc-800 focus:border-blue-500 outline-none transition-all font-bold text-sm"
+              >
+                {availableOrgs.map((org) => (
+                  <option key={org.id} value={org.id}>
+                    {org.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
           <div>
             <label className="block text-[10px] font-black uppercase tracking-widest text-zinc-500 dark:text-zinc-400 mb-2">
               Access Token de Mercado Pago
@@ -128,7 +201,8 @@ export function MPCredentialsForm() {
                 value={accessToken}
                 onChange={(e) => setAccessToken(e.target.value)}
                 placeholder="APP_USR-..."
-                className="w-full px-4 py-3 pr-12 rounded-xl border-2 border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950 focus:border-blue-500 dark:focus:border-blue-400 outline-none transition-all font-mono text-sm"
+                className="w-full px-4 py-3 pr-12 rounded-xl border-2 border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950 focus:border-blue-500 dark:focus:border-blue-400 outline-none transition-all font-mono text-sm disabled:opacity-70"
+                disabled={hasCredentials && !isEditing}
               />
               <button
                 type="button"
@@ -143,10 +217,10 @@ export function MPCredentialsForm() {
             </p>
           </div>
 
-          {/* Botones */}
           <div className="flex flex-col sm:flex-row gap-3">
-            {hasCredentials && accessToken === '••••••••••••••••••••••••' ? (
+            {hasCredentials && !isEditing ? (
               <button
+                key="btn-update"
                 type="button"
                 onClick={handleEdit}
                 className="flex-1 py-3 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 font-black rounded-xl transition-all hover:scale-[1.02] active:scale-[0.98] uppercase tracking-widest text-xs flex items-center justify-center gap-2"
@@ -155,8 +229,9 @@ export function MPCredentialsForm() {
                 Actualizar Token
               </button>
             ) : (
-              <>
+              <div key="edit-actions" className="flex flex-col sm:flex-row gap-3 flex-1">
                 <button
+                  key="btn-save"
                   type="submit"
                   disabled={saving || !accessToken}
                   className="flex-1 py-3 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 font-black rounded-xl transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-widest text-xs flex items-center justify-center gap-2"
@@ -164,11 +239,13 @@ export function MPCredentialsForm() {
                   <Save className="w-4 h-4" />
                   {saving ? 'Guardando...' : 'Guardar Credenciales'}
                 </button>
-                {hasCredentials && (
+                {(hasCredentials || isEditing) && (
                   <button
+                    key="btn-cancel"
                     type="button"
-                    onClick={() => {
-                      setAccessToken('••••••••••••••••••••••••')
+                    onClick={async () => {
+                      await fetchCredentials(true, organizationId)
+                      setIsEditing(false)
                       setShowToken(false)
                       setError('')
                     }}
@@ -177,11 +254,10 @@ export function MPCredentialsForm() {
                     Cancelar
                   </button>
                 )}
-              </>
+              </div>
             )}
           </div>
 
-          {/* Mensajes */}
           {message && (
             <p className="text-green-600 dark:text-green-400 font-bold text-center text-sm bg-green-50 dark:bg-green-900/10 p-3 rounded-xl">
               {message}
