@@ -106,9 +106,9 @@ export async function GET() {
         }
         
         // Update active roles with synced data
-        const syncedActiveRoles = syncedUserRoles.filter(r => r.status !== 'removed')
-        const syncedActiveOrg = syncedActiveRoles.find(r => r.is_primary) || syncedActiveRoles[0] || null
-        const syncedIsSysadmin = syncedActiveRoles.some(r => r.role === 'sysadmin')
+        const syncedActiveRoles = syncedUserRoles.filter((r: { status?: string }) => r.status !== 'removed')
+        const syncedActiveOrg = syncedActiveRoles.find((r: { is_primary?: boolean }) => r.is_primary) || syncedActiveRoles[0] || null
+        const syncedIsSysadmin = syncedActiveRoles.some((r: { role: string }) => r.role === 'sysadmin')
         const syncedEffectiveRole = syncedIsSysadmin ? 'sysadmin' : (syncedActiveOrg?.role || 'account_user')
         
         return NextResponse.json({

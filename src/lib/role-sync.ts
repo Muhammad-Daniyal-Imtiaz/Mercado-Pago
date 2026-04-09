@@ -8,16 +8,25 @@ export async function syncUserRoles(userId: string) {
   const adminClient = createAdminClient()
   
   try {
-    // 1. Obtener todas las organizaciones donde el usuario es miembro
+    // 1. Obtener todas las organizaciones y filtrar en código
     const { data: organizations, error: orgError } = await adminClient
       .from('organizations')
       .select('id, name, members')
-      .contains('members', `[{"id": "${userId}"}]`)
     
     if (orgError) {
       console.error('Error obteniendo organizaciones del usuario:', orgError)
       return false
     }
+    
+    // Filtrar organizaciones donde el usuario es miembro
+    const userOrganizations = organizations?.filter(org => {
+      try {
+        const members = typeof org.members === 'string' ? JSON.parse(org.members) : org.members
+        return members.some((m: { id: string }) => m.id === userId)
+      } catch {
+        return false
+      }
+    }) || []
     
     // 2. Obtener roles actuales del usuario
     const { data: user, error: userError } = await adminClient
@@ -48,29 +57,47 @@ export async function syncUserRoles(userId: string) {
     
     // 4. Construir nuevos roles basados en las organizaciones
     const newRoles = []
-    let hasPrimaryRole = false
     
     // Mantener rol global si existe
     const globalRole = currentRoles.find(r => r.organization_id === null)
     if (globalRole) {
       newRoles.push(globalRole)
-      hasPrimaryRole = globalRole.is_primary === true
     } else {
-      // Crear rol global por defecto si no existe
+      // Buscar el rol más alto de las organizaciones del usuario
+      const orgRoles = userOrganizations.flatMap(org => {
+        try {
+          const members = typeof org.members === 'string' ? JSON.parse(org.members) : org.members
+          const userMembership = members.find((m: { id: string; role: string; status?: string }) => m.id === userId)
+          return userMembership && userMembership.status !== 'removed' ? [userMembership.role] : []
+        } catch {
+          return []
+        }
+      })
+      
+      // Determinar el rol global basado en la jerarquía
+      let globalRoleName = 'account_user'
+      if (orgRoles.includes('sysadmin')) {
+        globalRoleName = 'sysadmin'
+      } else if (orgRoles.includes('account_admin')) {
+        globalRoleName = 'account_admin'
+      } else if (orgRoles.includes('account_observer')) {
+        globalRoleName = 'account_observer'
+      }
+      
+      // Crear rol global basado en el rol más alto encontrado
       newRoles.push({
-        role: 'account_user',
+        role: globalRoleName,
         status: 'active',
         is_primary: true,
         organization_id: null
       })
-      hasPrimaryRole = true
     }
     
     // Agregar roles de las organizaciones
-    organizations.forEach(org => {
+    userOrganizations.forEach(org => {
       try {
         const members = typeof org.members === 'string' ? JSON.parse(org.members) : org.members
-        const userMembership = members.find((m: any) => m.id === userId)
+        const userMembership = members.find((m: { id: string; role: string; status?: string }) => m.id === userId)
         
         if (userMembership && userMembership.status !== 'removed') {
           newRoles.push({
@@ -112,13 +139,22 @@ export async function checkRoleConsistency(userId: string): Promise<boolean> {
   const adminClient = createAdminClient()
   
   try {
-    // Obtener organizaciones del usuario
+    // Obtener todas las organizaciones
     const { data: organizations, error: orgError } = await adminClient
       .from('organizations')
       .select('id, members')
-      .contains('members', `[{"id": "${userId}"}]`)
     
     if (orgError) return false
+    
+    // Filtrar organizaciones donde el usuario es miembro
+    const userOrganizations = organizations?.filter(org => {
+      try {
+        const members = typeof org.members === 'string' ? JSON.parse(org.members) : org.members
+        return members.some((m: { id: string }) => m.id === userId)
+      } catch {
+        return false
+      }
+    }) || []
     
     // Obtener roles del usuario
     const { data: user, error: userError } = await adminClient
@@ -139,10 +175,10 @@ export async function checkRoleConsistency(userId: string): Promise<boolean> {
     
     // Contar roles activos en organizaciones
     let activeOrgRoles = 0
-    organizations.forEach(org => {
+    userOrganizations.forEach(org => {
       try {
         const members = typeof org.members === 'string' ? JSON.parse(org.members) : org.members
-        const userMembership = members.find((m: any) => m.id === userId)
+        const userMembership = members.find((m: { id: string; status?: string }) => m.id === userId)
         if (userMembership && userMembership.status !== 'removed') {
           activeOrgRoles++
         }

@@ -27,6 +27,12 @@ export function OrganizationFormEn({ onSuccess }: { onSuccess?: () => void }) {
 
       setMessage('Organization created successfully!')
       setName('')
+      
+      // Emit event to update other components
+      window.dispatchEvent(new CustomEvent('org-created', { 
+        detail: { organization: data.organization } 
+      }))
+      
       if (onSuccess) onSuccess()
     } catch (err: any) {
       setError(err.message)
