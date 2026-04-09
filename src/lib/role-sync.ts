@@ -63,9 +63,30 @@ export async function syncUserRoles(userId: string) {
     if (globalRole) {
       newRoles.push(globalRole)
     } else {
-      // Crear rol global por defecto si no existe
+      // Buscar el rol más alto de las organizaciones del usuario
+      const orgRoles = userOrganizations.flatMap(org => {
+        try {
+          const members = typeof org.members === 'string' ? JSON.parse(org.members) : org.members
+          const userMembership = members.find((m: { id: string; role: string; status?: string }) => m.id === userId)
+          return userMembership && userMembership.status !== 'removed' ? [userMembership.role] : []
+        } catch {
+          return []
+        }
+      })
+      
+      // Determinar el rol global basado en la jerarquía
+      let globalRoleName = 'account_user'
+      if (orgRoles.includes('sysadmin')) {
+        globalRoleName = 'sysadmin'
+      } else if (orgRoles.includes('account_admin')) {
+        globalRoleName = 'account_admin'
+      } else if (orgRoles.includes('account_observer')) {
+        globalRoleName = 'account_observer'
+      }
+      
+      // Crear rol global basado en el rol más alto encontrado
       newRoles.push({
-        role: 'account_user',
+        role: globalRoleName,
         status: 'active',
         is_primary: true,
         organization_id: null

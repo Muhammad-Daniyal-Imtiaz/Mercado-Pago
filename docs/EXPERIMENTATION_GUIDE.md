@@ -9,7 +9,7 @@ Probar el sistema de sincronización automática de roles y verificar que las ga
 ```bash
 # Ejecutar script para limpiar tus datos
 NEXT_PUBLIC_SUPABASE_URL=https://izyhmdkultqrhobnjliv.supabase.co \
-SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6eWhtZGt1bHRxcmhvYm5qbGl2Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NDM1NTU5MSwiZXhwIjoyMDg5OTMxNTkxfQ.TRV9HnOfFBEaujbv4ddnvb6RNJivprLGyB2BXghpPWU \
+SUPABASE_SERVICE_ROLE_KEY=SECRET-KEY \
 node scripts/reset-user-data.js
 ```
 
@@ -27,7 +27,7 @@ node scripts/reset-user-data.js
 ```bash
 # Verificar que estás como account_user
 NEXT_PUBLIC_SUPABASE_URL=https://izyhmdkultqrhobnjliv.supabase.co \
-SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6eWhtZGt1bHRxcmhvYm5qbGl2Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NDM1NTU5MSwiZXhwIjoyMDg5OTMxNTkxfQ.TRV9HnOfFBEaujbv4ddnvb6RNJivprLGyB2BXghpPWU \
+SUPABASE_SERVICE_ROLE_KEY=SECRET-KEY \
 node scripts/check-current-session.js
 ```
 
@@ -97,7 +97,7 @@ curl -X POST http://localhost:3001/api/auth/sync-roles \
 ```bash
 # Script para cambiar tu rol a sysadmin
 NEXT_PUBLIC_SUPABASE_URL=https://izyhmdkultqrhobnjliv.supabase.co \
-SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6eWhtZGt1bHRxcmhvYm5qbGl2Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NDM1NTU5MSwiZXhwIjoyMDg5OTMxNTkxfQ.TRV9HnOfFBEaujbv4ddnvb6RNJivprLGyB2BXghpPWU \
+SUPABASE_SERVICE_ROLE_KEY=SECRET-KEY \
 node scripts/change-user-role.js
 ```
 

@@ -18,13 +18,21 @@ function parseMetadata(metadata: string | null | undefined): OrgMetadata {
   }
 }
 
-function getOrgInitials(name: string): string {
-  return name
-    .split(' ')
+function getOrgInitials(name?: string): string {
+  if (!name || typeof name !== 'string') {
+    return 'OR'
+  }
+  
+  const parts = name.trim().split(/\s+/)
+  if (parts.length === 0) return 'OR'
+  
+  const initials = parts
     .map(n => n.charAt(0))
     .join('')
     .toUpperCase()
     .slice(0, 2)
+  
+  return initials || 'OR'
 }
 
 export function Header({ onMenuClick }: { onMenuClick?: () => void }) {

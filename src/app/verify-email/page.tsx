@@ -77,12 +77,12 @@ function UnifiedVerifyForm() {
           </svg>
         </div>
         <h1 className="text-4xl font-black text-zinc-900 dark:text-white uppercase tracking-tighter leading-none mb-3">
-          {isGoogle ? 'Verify Access' : 'Join Team'}
+          {isGoogle ? 'Verificar Acceso' : 'Unirse al Equipo'}
         </h1>
         <p className="text-zinc-500 font-medium text-sm leading-relaxed px-4 italic">
           {isGoogle 
-            ? 'Complete your account setup by entering the OTP code sent to your email.'
-            : 'Enter your invitation code and set up your profile to continue.'}
+            ? 'Completa la configuración de tu cuenta ingresando el código OTP enviado a tu correo electrónico.'
+            : 'Ingresa tu código de invitación y configura tu perfil para continuar.'}
         </p>
       </div>
       
@@ -100,11 +100,11 @@ function UnifiedVerifyForm() {
                 <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24s.92 7.54 2.56 10.78l7.97-6.19z" />
                 <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z" />
               </svg>
-              <span className="font-bold text-zinc-900 dark:text-white">Continue with Google</span>
+              <span className="font-bold text-zinc-900 dark:text-white">Continuar con Google</span>
             </button>
             <div className="flex items-center gap-4 py-2">
               <div className="h-px flex-1 bg-zinc-100 dark:bg-zinc-800"></div>
-              <span className="text-[10px] font-black uppercase tracking-widest text-zinc-300">Or continue with email</span>
+              <span className="text-[10px] font-black uppercase tracking-widest text-zinc-300">O continuar con correo electrónico</span>
               <div className="h-px flex-1 bg-zinc-100 dark:bg-zinc-800"></div>
             </div>
           </div>
@@ -113,7 +113,7 @@ function UnifiedVerifyForm() {
         <div className="space-y-4">
 
           <div>
-            <label className="block text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 mb-2 px-1">Email Address</label>
+            <label className="block text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 mb-2 px-1">Dirección de Correo Electrónico</label>
             <input
               name="email"
               type="email"
@@ -126,7 +126,7 @@ function UnifiedVerifyForm() {
           </div>
 
           <div>
-            <label className="block text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 mb-2 px-1">Verification OTP</label>
+            <label className="block text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 mb-2 px-1">Código OTP de Verificación</label>
             <input
               name="otp"
               type="text"
@@ -140,7 +140,7 @@ function UnifiedVerifyForm() {
           </div>
 
           <div>
-            <label className="block text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 mb-2 px-1">Full Name</label>
+            <label className="block text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 mb-2 px-1">Nombre Completo</label>
             <input
               name="fullName"
               type="text"
@@ -148,13 +148,13 @@ function UnifiedVerifyForm() {
               value={formData.fullName}
               onChange={handleChange}
               className="w-full px-5 py-4 rounded-2xl border-2 bg-zinc-50 dark:bg-zinc-950 border-zinc-100 dark:border-zinc-800 focus:border-zinc-900 dark:focus:border-white outline-none transition-all font-bold"
-              placeholder="How should we call you?"
+              placeholder="¿Cómo deberíamos llamarte?"
             />
           </div>
 
           {!isGoogle && (
             <div>
-              <label className="block text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 mb-2 px-1">Set Password</label>
+              <label className="block text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 mb-2 px-1">Establecer Contraseña</label>
               <input
                 name="password"
                 type="password"
